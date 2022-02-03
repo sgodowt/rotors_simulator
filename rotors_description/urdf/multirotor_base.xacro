@@ -55,10 +55,10 @@
       </inertial>
 
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0" rpy="1.5707963 0 3.1415926" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
-            <mesh filename="${mesh_file}" scale="1 1 1" />
+            <mesh filename="${mesh_file}" scale="0.001 0.001 0.001" />
           </xacro:if>
           <xacro:unless value="${use_mesh_file}">
             <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
@@ -75,13 +75,14 @@
     </link>
 
     <!-- attach multirotor_base_plugin to the base_link -->
-    <gazebo>
+    <!-- <gazebo>
       <plugin filename="librotors_gazebo_multirotor_base_plugin.so" name="multirotor_base_plugin">
         <robotNamespace>${robot_namespace}</robotNamespace>
         <linkName>${robot_namespace}/base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
-    </gazebo>
+    </gazebo> -->
+
   </xacro:macro>
 
   <!-- Rotor joint and link -->

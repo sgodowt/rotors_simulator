@@ -87,6 +87,9 @@ void RollPitchYawrateThrustControllerNode::OdometryCallback(const nav_msgs::Odom
   Eigen::VectorXd ref_rotor_velocities;
   roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
+  // Eigen::VectorXd ref_rotor_velocities;
+  // roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
+
   // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 

@@ -31,6 +31,7 @@ RollPitchYawrateThrustController::RollPitchYawrateThrustController()
 RollPitchYawrateThrustController::~RollPitchYawrateThrustController() {}
 
 void RollPitchYawrateThrustController::InitializeParameters() {
+  // Allocation Matrix is indicated to the transform from motor velocity to the force and torque applied to the drone in FLU frame.
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
   // To make the tuning independent of the inertia matrix we divide here.
   normalized_attitude_gain_ = controller_parameters_.attitude_gain_.transpose()
@@ -93,11 +94,17 @@ void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d*
   Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
   double yaw = atan2(R(1, 0), R(0, 0));
 
-  // Get the desired rotation matrix.
+  // Get the desired rotation matrix. 312
+  // Eigen::Matrix3d R_des;
+  // R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())  // yaw
+  //       * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX())  // roll
+  //       * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY());  // pitch
+
+  // Get the desired rotation matrix. 321
   Eigen::Matrix3d R_des;
   R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())  // yaw
-        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX())  // roll
-        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY());  // pitch
+        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY())  // pitch
+        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX());  // roll
 
   // Angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
