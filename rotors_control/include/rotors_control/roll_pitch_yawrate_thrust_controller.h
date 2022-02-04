@@ -55,6 +55,8 @@ class RollPitchYawrateThrustController {
   void InitializeParameters();
   void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
 
+  void CalculateTorqueThrust(Eigen::Vector4d* torque_thrust) const;
+
   void SetOdometry(const EigenOdometry& odometry);
   void SetRollPitchYawrateThrust(
       const mav_msgs::EigenRollPitchYawrateThrust& roll_pitch_yawrate_thrust);
@@ -75,6 +77,8 @@ class RollPitchYawrateThrustController {
   EigenOdometry odometry_;
 
   void ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const;
+  
+  void ComputeDesiredTorque(Eigen::Vector3d* desired_torque) const;
 };
 }
 

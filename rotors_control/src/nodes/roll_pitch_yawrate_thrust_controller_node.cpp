@@ -34,6 +34,9 @@ RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustControllerNode() {
   odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 1,
                                &RollPitchYawrateThrustControllerNode::OdometryCallback, this);
 
+  torque_thrust_reference_pub_ = nh.advertise<mav_msgs::TorqueThrust>(
+      kDefaultCommandTorqueThrustTopic, 1);
+
   motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
       kDefaultCommandMotorSpeedTopic, 1);
 }
@@ -84,11 +87,24 @@ void RollPitchYawrateThrustControllerNode::OdometryCallback(const nav_msgs::Odom
   eigenOdometryFromMsg(odometry_msg, &odometry);
   roll_pitch_yawrate_thrust_controller_.SetOdometry(odometry);
 
+  Eigen::Vector4d ref_torque_thrust;
+  roll_pitch_yawrate_thrust_controller_.CalculateTorqueThrust(&ref_torque_thrust);
+
+  //torque_thrust_msg is in FLU frame
+  mav_msgs::TorqueThrustPtr torque_thrust_msg(new mav_msgs::TorqueThrust);
+
+  torque_thrust_msg->torque.x=ref_torque_thrust(0);
+  torque_thrust_msg->torque.y=ref_torque_thrust(1);
+  torque_thrust_msg->torque.z=ref_torque_thrust(2);
+  torque_thrust_msg->thrust.x=0;
+  torque_thrust_msg->thrust.y=0;
+  torque_thrust_msg->thrust.z=ref_torque_thrust(3);
+  torque_thrust_msg->header.stamp = odometry_msg->header.stamp;
+
+  torque_thrust_reference_pub_.publish(torque_thrust_msg);
+
   Eigen::VectorXd ref_rotor_velocities;
   roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
-
-  // Eigen::VectorXd ref_rotor_velocities;
-  // roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
   // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);

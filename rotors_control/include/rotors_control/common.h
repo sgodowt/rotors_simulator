@@ -45,6 +45,9 @@ static const std::string kDefaultImuTopic =
 static const std::string kDefaultOdometryTopic =
     mav_msgs::default_topics::ODOMETRY; // "odometry"
 
+static const std::string kDefaultCommandTorqueThrustTopic =
+    mav_msgs::default_topics::COMMAND_TORQUE_THRUST; // "command/torque_thrust";
+
 struct EigenOdometry {
   EigenOdometry()
       : position(0.0, 0.0, 0.0),
