@@ -76,6 +76,9 @@
 
 #include "rotors_gazebo_plugins/common.h"
 
+#if (_DEBUG_TORQUE_THRUST_)
+#include <mav_msgs/TorqueThrust.h>
+#endif
 namespace gazebo {
 
 // typedef's to make life easier
@@ -313,6 +316,12 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   void RosWindSpeedMsgCallback(
       const rotors_comm::WindSpeedConstPtr& ros_wind_speed_msg_ptr,
       gazebo::transport::PublisherPtr gz_publisher_ptr);
+
+#if (_DEBUG_TORQUE_THRUST_)
+  void RosTorqueThrustMsgCallback(
+      const mav_msgs::TorqueThrustConstPtr& ros_torque_thrust_msg_ptr,
+      gazebo::transport::PublisherPtr gz_publisher_ptr);
+#endif
 
   // ============================================ //
   // ====== TRANSFORM BROADCASTER RELATED ======= //

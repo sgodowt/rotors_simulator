@@ -37,12 +37,23 @@
 
 #include "rotors_gazebo_plugins/common.h"
 
+#if (_DEBUG_TORQUE_THRUST_)
+#include <Eigen/Eigen>
+#include "WrenchStamped.pb.h"
+#endif
+
 namespace gazebo {
 
 // Default values
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultFrameId = "base_link";
 static const std::string kDefaultJointStatePubTopic = "joint_states";
+
+#if (_DEBUG_TORQUE_THRUST_)
+static const std::string kDefaultCommandTorqueThrustPubTopic = "command/torque_thrust";
+typedef const boost::shared_ptr<const gz_geometry_msgs::WrenchStamped>
+    GzTorqueThrustMsgPtr;
+#endif
 
 /// \brief This plugin publishes the motor speeds of your multirotor model.
 class GazeboMultirotorBasePlugin : public ModelPlugin {
@@ -58,7 +69,15 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
         frame_id_(kDefaultFrameId),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         node_handle_(NULL),
+
+#if (_DEBUG_TORQUE_THRUST_)
+        command_torque_thrust_sub_topic_(kDefaultCommandTorqueThrustPubTopic),
+        ref_torque_input_(0.0,0.0,0.0),
+        ref_thrust_input_(0.0,0.0,0.0),
+#endif
         pubs_and_subs_created_(false) {}
+
+
 
   virtual ~GazeboMultirotorBasePlugin();
 
@@ -103,6 +122,15 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   std::string frame_id_;
   double rotor_velocity_slowdown_sim_;
 
+#if (_DEBUG_TORQUE_THRUST_)
+  std::string command_torque_thrust_sub_topic_;
+  Eigen::Vector3d ref_torque_input_;
+  Eigen::Vector3d ref_thrust_input_;
+  gazebo::transport::SubscriberPtr command_torque_thrust_sub_;
+
+  void UpdateForcesAndMoments();
+  void CommandTorqueThrustCallback(GzTorqueThrustMsgPtr& torque_thrust_msg);
+#endif
   gazebo::transport::PublisherPtr motor_pub_;
 
   /// \details    Re-used message object, defined here to reduce dynamic memory allocation.

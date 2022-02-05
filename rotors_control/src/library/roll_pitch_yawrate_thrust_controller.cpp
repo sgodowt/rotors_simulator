@@ -122,6 +122,7 @@ void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d*
                            + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
 }
 
+#if (_DEBUG_TORQUE_THRUST_)
 void RollPitchYawrateThrustController::CalculateTorqueThrust(Eigen::Vector4d* torque_thrust) const {
   assert(torque_thrust);
   assert(initialized_params_);
@@ -167,6 +168,6 @@ void RollPitchYawrateThrustController::ComputeDesiredTorque(Eigen::Vector3d* des
                            - angular_rate_error.cwiseProduct(controller_parameters_.angular_rate_gain_)
                            + odometry_.angular_velocity.cross(vehicle_parameters_.inertia_*odometry_.angular_velocity); // we don't need the inertia matrix here
 }
-
+#endif
 
 }

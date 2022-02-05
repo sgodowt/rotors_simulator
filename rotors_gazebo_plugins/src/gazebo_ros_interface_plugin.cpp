@@ -360,6 +360,28 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
       break;
     }
+
+#if (_DEBUG_TORQUE_THRUST_)
+    case gz_std_msgs::ConnectRosToGazeboTopic::TORQUE_THRUST: {
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+          gz_node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(
+              gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create ROS subscriber.
+      ros::Subscriber ros_subscriber =
+          ros_node_handle_->subscribe<mav_msgs::TorqueThrust>(
+              gz_connect_ros_to_gazebo_topic_msg->ros_topic(), 1,
+              boost::bind(&GazeboRosInterfacePlugin::RosTorqueThrustMsgCallback,
+                          this, _1, gz_publisher_ptr));
+
+      // Save reference to the ROS subscriber so callback will continue to be
+      // called.
+      ros_subscribers.push_back(ros_subscriber);
+
+      break;
+    }
+#endif
+
     default: {
       gzthrow("ConnectRosToGazeboTopic message type with enum val = "
               << gz_connect_ros_to_gazebo_topic_msg->msgtype()
@@ -934,6 +956,40 @@ void GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback(
 //================ ROS -> GAZEBO MSG CALLBACKS/CONVERTERS ===================//
 //===========================================================================//
 
+#if (_DEBUG_TORQUE_THRUST_)
+void GazeboRosInterfacePlugin::RosTorqueThrustMsgCallback(
+      const mav_msgs::TorqueThrustConstPtr& ros_torque_thrust_msg_ptr,
+      gazebo::transport::PublisherPtr gz_publisher_ptr){
+  // Convert ROS message to Gazebo message
+
+  gz_geometry_msgs::WrenchStamped gz_torque_thrust_msg;
+
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+
+  ConvertHeaderRosToGz(ros_torque_thrust_msg_ptr->header,
+                       gz_torque_thrust_msg.mutable_header());
+
+  // ============================================ //
+  // =================== FORCE ================== //
+  // ============================================ //
+  gz_torque_thrust_msg.mutable_wrench()->mutable_force()->set_x(ros_torque_thrust_msg_ptr->thrust.x);
+  gz_torque_thrust_msg.mutable_wrench()->mutable_force()->set_y(ros_torque_thrust_msg_ptr->thrust.y);
+  gz_torque_thrust_msg.mutable_wrench()->mutable_force()->set_z(ros_torque_thrust_msg_ptr->thrust.z);
+
+  // ============================================ //
+  // ==================== TORQUE ================ //
+  // ============================================ //
+
+  gz_torque_thrust_msg.mutable_wrench()->mutable_torque()->set_x(ros_torque_thrust_msg_ptr->torque.x);
+  gz_torque_thrust_msg.mutable_wrench()->mutable_torque()->set_y(ros_torque_thrust_msg_ptr->torque.y);
+  gz_torque_thrust_msg.mutable_wrench()->mutable_torque()->set_z(ros_torque_thrust_msg_ptr->torque.z);
+
+  // Publish to Gazebo
+  gz_publisher_ptr->Publish(gz_torque_thrust_msg);
+}
+#endif 
 void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
     const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {

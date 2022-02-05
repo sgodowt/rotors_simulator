@@ -21,6 +21,8 @@
 #ifndef INCLUDE_ROTORS_CONTROL_COMMON_H_
 #define INCLUDE_ROTORS_CONTROL_COMMON_H_
 
+#define _DEBUG_TORQUE_THRUST_ 1
+
 #include <assert.h>
 
 #include <mav_msgs/conversions.h>
@@ -44,9 +46,11 @@ static const std::string kDefaultImuTopic =
     mav_msgs::default_topics::IMU; // "imu
 static const std::string kDefaultOdometryTopic =
     mav_msgs::default_topics::ODOMETRY; // "odometry"
-
+    
+#if (_DEBUG_TORQUE_THRUST_)
 static const std::string kDefaultCommandTorqueThrustTopic =
     mav_msgs::default_topics::COMMAND_TORQUE_THRUST; // "command/torque_thrust";
+#endif
 
 struct EigenOdometry {
   EigenOdometry()

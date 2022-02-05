@@ -54,8 +54,9 @@ class RollPitchYawrateThrustControllerNode {
   // subscribers
   ros::Subscriber cmd_roll_pitch_yawrate_thrust_sub_;
   ros::Subscriber odometry_sub_;
-
+#if (_DEBUG_TORQUE_THRUST_)
   ros::Publisher torque_thrust_reference_pub_;
+#endif
   ros::Publisher motor_velocity_reference_pub_;
 
   void RollPitchYawrateThrustCallback(

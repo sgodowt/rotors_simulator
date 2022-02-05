@@ -22,6 +22,8 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_COMMON_H_
 #define ROTORS_GAZEBO_PLUGINS_COMMON_H_
 
+#define _DEBUG_TORQUE_THRUST_ 1
+
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
 #include <tinyxml.h>

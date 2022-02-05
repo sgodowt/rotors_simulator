@@ -414,6 +414,8 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
     }
     default:  // MotorType::kVelocity
     {
+
+#if (!_DEBUG_TORQUE_THRUST_)
       motor_rot_vel_ = joint_->GetVelocity(0);
       if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
         gzerr << "Aliasing on motor [" << motor_number_
@@ -460,7 +462,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
       // Transforming the drag torque into the parent frame to handle
       // arbitrary rotor orientations.
       ignition::math::Vector3d drag_torque_parent_frame =
-          pose_difference.Rot().RotateVector(drag_torque);
+          pose_difference.Rot().RotateVector(drag_torque);    
       parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
 
       ignition::math::Vector3d rolling_moment;
@@ -480,6 +482,11 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
       joint_->SetVelocity(
           0, turning_direction_ * ref_motor_rot_vel /
                  rotor_velocity_slowdown_sim_);
+#else
+      joint_->SetVelocity(
+          0, turning_direction_ * max_rot_velocity_*0.3 /
+                 rotor_velocity_slowdown_sim_);
+#endif
     }
   }
 }

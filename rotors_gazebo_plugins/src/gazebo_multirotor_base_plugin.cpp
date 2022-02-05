@@ -27,6 +27,10 @@
 
 #include "ConnectGazeboToRosTopic.pb.h"
 
+#if (_DEBUG_TORQUE_THRUST_)
+#include "ConnectRosToGazeboTopic.pb.h"
+#endif
+
 namespace gazebo {
 
 GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
@@ -95,7 +99,9 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;
   }
-
+#if (_DEBUG_TORQUE_THRUST_)
+  UpdateForcesAndMoments();
+#endif
   // Get the current simulation time.
   common::Time now = world_->SimTime();
 
@@ -133,6 +139,31 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
       node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>(
           "~/" + kConnectGazeboToRosSubtopic, 1);
 
+#if (_DEBUG_TORQUE_THRUST_)
+  // Create temporary "ConnectRosToGazeboTopic" publisher and message
+  gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
+      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>(
+          "~/" + kConnectRosToGazeboSubtopic, 1);
+  // ============================================ //
+  // = CONTROL COMMAND MSG SETUP (ROS->GAZEBO) = //
+  // ============================================ //
+
+  command_torque_thrust_sub_ = node_handle_->Subscribe(
+      "~/" + namespace_ + "/" + command_torque_thrust_sub_topic_,
+      &GazeboMultirotorBasePlugin::CommandTorqueThrustCallback, this);
+
+  // Connect to ROS
+  gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
+  connect_ros_to_gazebo_topic_msg.set_ros_topic(
+      namespace_ + "/" + command_torque_thrust_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_topic(
+      "~/" + namespace_ + "/" + command_torque_thrust_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_msgtype(
+      gz_std_msgs::ConnectRosToGazeboTopic::TORQUE_THRUST);
+  gz_connect_ros_to_gazebo_topic_pub->Publish(
+      connect_ros_to_gazebo_topic_msg, true);
+#endif
+
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
@@ -167,6 +198,27 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
                                            true);
 }
+
+#if (_DEBUG_TORQUE_THRUST_)
+void GazeboMultirotorBasePlugin::UpdateForcesAndMoments(){
+
+  // Apply a force to the link.
+  link_->AddRelativeForce(ignition::math::Vector3d (ref_thrust_input_(0), ref_thrust_input_(1), ref_thrust_input_(2)));
+  link_->AddRelativeTorque(ignition::math::Vector3d (ref_torque_input_(0), ref_torque_input_(1), ref_torque_input_(2)));
+  
+}
+
+void GazeboMultirotorBasePlugin::CommandTorqueThrustCallback(GzTorqueThrustMsgPtr& torque_thrust_msg){
+
+  ref_thrust_input_(0) = torque_thrust_msg->wrench().force().x();
+  ref_thrust_input_(1) = torque_thrust_msg->wrench().force().y();
+  ref_thrust_input_(2) = torque_thrust_msg->wrench().force().z();
+  ref_torque_input_(0) = torque_thrust_msg->wrench().torque().x();
+  ref_torque_input_(1) = torque_thrust_msg->wrench().torque().y();
+  ref_torque_input_(2) = torque_thrust_msg->wrench().torque().z();
+
+};
+#endif
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMultirotorBasePlugin);
 

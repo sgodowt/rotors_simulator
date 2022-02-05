@@ -83,7 +83,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   if (!received_first_reference_) {
     return;
   }
-
+#if (!_DEBUG_TORQUE_THRUST_)
   common::Time now = world_->SimTime();
 
   gz_sensor_msgs::Actuators turning_velocities_msg;
@@ -99,6 +99,8 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   turning_velocities_msg.mutable_header()->set_frame_id("");
 
   motor_velocity_reference_pub_->Publish(turning_velocities_msg);
+#endif
+
 }
 
 void GazeboControllerInterface::CreatePubsAndSubs() {
