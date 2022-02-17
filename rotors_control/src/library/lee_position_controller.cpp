@@ -150,4 +150,72 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
                            - angular_rate_error.cwiseProduct(normalized_angular_rate_gain_)
                            + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
 }
+
+
+#if (_DEBUG_TORQUE_THRUST_)
+void LeePositionController::CalculateTorqueThrust(Eigen::Vector4d* torque_thrust) const {
+  assert(torque_thrust);
+  assert(initialized_params_);
+
+  // Return 0 velocities on all rotors, until the first command is received.
+  if (!controller_active_) {
+    *torque_thrust = Eigen::Vector4d::Zero();
+    return;
+  }
+  Eigen::Vector3d acceleration;
+  ComputeDesiredAcceleration(&acceleration);
+
+  Eigen::Vector3d torque;
+  ComputeDesiredTorque(acceleration, &torque);
+
+ // Project thrust onto body z axis.
+  double thrust = -vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
+
+  torque_thrust->block<3, 1>(0, 0) = torque;
+
+  (*torque_thrust)(3) = thrust;
+}
+
+
+void LeePositionController::ComputeDesiredTorque(const Eigen::Vector3d& acceleration,Eigen::Vector3d* desired_torque) const {
+  assert(desired_torque);
+
+  Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
+
+  // Get the desired rotation matrix.
+  Eigen::Vector3d b1_des;
+  double yaw = command_trajectory_.getYaw();
+  b1_des << cos(yaw), sin(yaw), 0; // roll
+
+  Eigen::Vector3d b3_des;
+  b3_des = -acceleration / acceleration.norm();
+
+  Eigen::Vector3d b2_des;
+  b2_des = b3_des.cross(b1_des);
+  b2_des.normalize();
+
+  Eigen::Matrix3d R_des;
+  R_des.col(0) = b2_des.cross(b3_des);
+  R_des.col(1) = b2_des;
+  R_des.col(2) = b3_des;
+
+  // Angle error according to lee et al.
+  Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
+  Eigen::Vector3d angle_error;
+  vectorFromSkewMatrix(angle_error_matrix, &angle_error);
+
+  // TODO(burrimi) include angular rate references at some point.
+  Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
+  angular_rate_des[2] = command_trajectory_.getYawRate();
+
+  Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
+
+  *desired_torque = -1 * angle_error.cwiseProduct(controller_parameters_.attitude_gain_)
+                           - angular_rate_error.cwiseProduct(controller_parameters_.angular_rate_gain_)
+                           + odometry_.angular_velocity.cross(vehicle_parameters_.inertia_*odometry_.angular_velocity); // we don't need the inertia matrix here
+}
+#endif
+
+
+
 }

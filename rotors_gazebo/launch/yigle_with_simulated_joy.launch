@@ -42,4 +42,22 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   </group>
+
+
+	<rosparam command="load" file="$(find rotors_gazebo)/yigle_arm_controller.yaml"/>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="$(arg mav_name)" args="joint_state_controller
+    joint0_position_controller_right 
+    joint1_position_controller_right  
+    joint2_position_controller_right 
+    joint3_position_controller_right 
+    joint4_position_controller_right 
+
+    joint0_position_controller_left 
+    joint1_position_controller_left  
+    joint2_position_controller_left 
+    joint3_position_controller_left 
+    joint4_position_controller_left 
+    "/>
+    
 </launch>

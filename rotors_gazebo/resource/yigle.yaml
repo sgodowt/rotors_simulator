@@ -1,7 +1,6 @@
 # Firefly vehicle parameters
-mass: 1.56779
-inertia: {xx: 0.0347563, xy: 0.0, xz: 0.0, yy: 0.0458929, yz: 0.0, zz: 0.0977}
-
+mass: 15.4740
+inertia: {xx: 6.8902275e-1, xy: 3.1406183e-04, xz: -6.6251112e-04, yy: 6.5920645e-1, yz: 2.9107974e-04, zz: 1.0416577}
 # angle should be expressed in rad
 # direction 1 means counter clockwise, -1 clockwise
 # The order of the rotors matters for the calculation of the allocation matrix.

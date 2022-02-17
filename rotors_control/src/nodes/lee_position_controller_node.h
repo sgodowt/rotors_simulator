@@ -60,6 +60,10 @@ class LeePositionControllerNode {
   ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
   ros::Subscriber cmd_pose_sub_;
   ros::Subscriber odometry_sub_;
+  
+#if (_DEBUG_TORQUE_THRUST_)
+  ros::Publisher torque_thrust_reference_pub_;
+#endif
 
   ros::Publisher motor_velocity_reference_pub_;
 

@@ -1,0 +1,264 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+<xacro:macro name="neck_head_macro"
+  params="robot_namespace parent_link">
+ 
+<gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+    <robotNamespace>${robot_namespace}</robotNamespace>
+  </plugin>
+</gazebo>
+
+
+<xacro:property name="PI" value="3.1415926535897931"/>
+
+
+<joint name="DJI_leg_joint" type="fixed">
+	<parent link="${parent_link}"/>
+	<child link="DJI_leg_link"/>
+	<origin rpy="${PI} 0 0" xyz="0 y z"/>
+</joint>
+
+<link name="DJI_leg_link">
+	<visual>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+		<mesh filename="" scale="0.001 0.001 0.001"/>
+		</geometry>
+	</visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0"/>
+      <inertia
+        ixx="" ixy="0.0" ixz="0.0"
+        iyy="" iyz="0.0"
+        izz=""/>
+    </inertial>
+</link>
+
+<joint name="neck_base_joint" type="fixed">
+	<parent link="DJI_leg_link"/>
+	<child link="neck_base_link"/>
+	<origin rpy="0 0 0" xyz="0 y z"/>
+</joint>
+
+<link name="neck_base_link">
+	<visual>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+		<mesh filename="" scale="0.001 0.001 0.001"/>
+		</geometry>
+	</visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0"/>
+      <inertia
+        ixx="" ixy="0.0" ixz="0.0"
+        iyy="" iyz="0.0"
+        izz=""/>
+    </inertial>
+</link>
+
+<joint name="neck_joint_1" type="fixed">
+	<parent link="neck_base_link"/>
+	<child link="neck_link_1"/>
+	<origin rpy="0 0 0" xyz="0 y z"/>
+</joint>
+
+<link name="neck_link_1">
+	<visual>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+		<mesh filename="" scale="0.001 0.001 0.001"/>
+		</geometry>
+	</visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0"/>
+      <inertia
+        ixx="" ixy="0.0" ixz="0.0"
+        iyy="" iyz="0.0"
+        izz=""/>
+    </inertial>
+</link>
+
+<joint name="neck_joint_2" type="fixed">
+	<parent link="neck_link_1"/>
+	<child link="head_link"/>
+	<origin rpy="${PI} 0 0" xyz="0 y z"/>
+</joint>
+
+<link name="head_link">
+	<visual>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+		<mesh filename="" scale="0.001 0.001 0.001"/>
+		</geometry>
+	</visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0"/>
+      <inertia
+        ixx="" ixy="0.0" ixz="0.0"
+        iyy="" iyz="0.0"
+        izz=""/>
+    </inertial>
+</link>
+
+<joint name="eye_joint" type="fixed">
+	<parent link="head_link"/>
+	<child link="left_camera_frame"/>
+	<origin rpy="0 0 ${PI/2}" xyz="0 y z"/>
+</joint>
+
+  <!-- Camera -->
+  <link name="left_camera_frame">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	<box size="${camera_link} ${camera_link} ${camera_link}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	<box size="${camera_link} ${camera_link} ${camera_link}"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <!-- generate an optical frame http://www.ros.org/reps/rep-0103.html#suffix-frames
+      so that ros and opencv can operate on the camera frame correctly -->
+  <joint name="camera_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera image
+        won't be aligned properly with the frame it is supposedly originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="left_camera_frame"/>
+    <child link="left_camera_optical_frame"/>
+  </joint>
+
+  <link name="left_camera_optical_frame">
+  </link>
+
+
+<gazebo reference="left_camera_frame">
+    <sensor type="multicamera" name="stereo_camera">
+      <update_rate>30.0</update_rate>
+      <camera name="left">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <camera name="right">
+        <pose>0 -0.07 0 0 0 0</pose>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>multisense_sl/camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>left_camera_optical_frame</frameName>
+        <!--<rightFrameName>right_camera_optical_frame</rightFrameName>-->
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <transmission name="tran_neck1">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="neck_joint_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_neck1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="tran_neck2">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="neck_joint_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_neck2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+</xacro:macro>
+</robot>

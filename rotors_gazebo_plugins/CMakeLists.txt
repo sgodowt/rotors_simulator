@@ -277,6 +277,21 @@ if (NOT NO_ROS)
   list(APPEND targets_to_install rotors_gazebo_controller_interface)
 endif()
 
+#================================= ARM ACTUATOR INTERFACE PLUGIN ==================================//
+if (NOT NO_ROS)
+  add_library(rotors_gazebo_arm_actuator_interface SHARED src/gazebo_arm_actuator_interface.cpp)
+  target_link_libraries(rotors_gazebo_arm_actuator_interface ${target_linking_LIBRARIES} )
+  add_dependencies(rotors_gazebo_arm_actuator_interface ${catkin_EXPORTED_TARGETS})
+  list(APPEND targets_to_install rotors_gazebo_arm_actuator_interface)
+endif()
+
+if (NOT NO_ROS)
+  add_library(rotors_gazebo_arm_actuator_interface_nofakelink SHARED src/gazebo_arm_actuator_interface_nofakelink.cpp)
+  target_link_libraries(rotors_gazebo_arm_actuator_interface_nofakelink ${target_linking_LIBRARIES} )
+  add_dependencies(rotors_gazebo_arm_actuator_interface_nofakelink ${catkin_EXPORTED_TARGETS})
+  list(APPEND targets_to_install rotors_gazebo_arm_actuator_interface_nofakelink)
+endif()
+
 #=================================== GEOTAGGED IMAGES PLUGIN ====================================//
 
 message(STATUS "GAZEBO ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")

@@ -323,6 +323,10 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
       gazebo::transport::PublisherPtr gz_publisher_ptr);
 #endif
 
+  void RosJointStateMsgCallback(
+      const sensor_msgs::JointStateConstPtr& ros_joint_state_msg_ptr,
+      gazebo::transport::PublisherPtr gz_publisher_ptr);
+
   // ============================================ //
   // ====== TRANSFORM BROADCASTER RELATED ======= //
   // ============================================ //

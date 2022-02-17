@@ -21,6 +21,33 @@
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <xacro:macro name="arm_actuator_plugin_macro"
+    params="namespace">
+    <gazebo>
+      <plugin name="arm_actuator_interface" filename="librotors_gazebo_arm_actuator_interface.so">
+        <robotNamespace>${namespace}</robotNamespace>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="arm_actuator_plugin_macro_nofakelink"
+    params="namespace">
+    <gazebo>
+      <plugin name="arm_actuator_interface_nofakelink" filename="librotors_gazebo_arm_actuator_interface_nofakelink.so">
+        <robotNamespace>${namespace}</robotNamespace>
+        <!-- <gazebo_joint_control_pid>
+          <p>0.01</p>
+          <i>0.0001</i>
+          <d>0.0001</d>
+          <iMax>0</iMax>
+          <iMin>0</iMin>
+          <cmdMax>0.15</cmdMax>
+          <cmdMin>-0.15</cmdMin>
+        </gazebo_joint_control_pid> -->
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add logging to a bag file. -->
   <xacro:macro name="bag_plugin_macro"
     params="namespace bag_file rotor_velocity_slowdown_sim wait_to_record_bag">

@@ -381,7 +381,24 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
 #endif
+    case gz_std_msgs::ConnectRosToGazeboTopic::JOINT_STATE: {
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+          gz_node_handle_->Advertise<gz_sensor_msgs::JointState>(
+              gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
+      // Create ROS subscriber.
+      ros::Subscriber ros_subscriber =
+          ros_node_handle_->subscribe<sensor_msgs::JointState>(
+              gz_connect_ros_to_gazebo_topic_msg->ros_topic(), 1,
+              boost::bind(&GazeboRosInterfacePlugin::RosJointStateMsgCallback,
+                          this, _1, gz_publisher_ptr));
+
+      // Save reference to the ROS subscriber so callback will continue to be
+      // called.
+      ros_subscribers.push_back(ros_subscriber);
+
+      break;
+    }
     default: {
       gzthrow("ConnectRosToGazeboTopic message type with enum val = "
               << gz_connect_ros_to_gazebo_topic_msg->msgtype()
@@ -990,6 +1007,31 @@ void GazeboRosInterfacePlugin::RosTorqueThrustMsgCallback(
   gz_publisher_ptr->Publish(gz_torque_thrust_msg);
 }
 #endif 
+
+void GazeboRosInterfacePlugin::RosJointStateMsgCallback(
+      const sensor_msgs::JointStateConstPtr& ros_joint_state_msg_ptr,
+      gazebo::transport::PublisherPtr gz_publisher_ptr){
+  // Convert ROS message to Gazebo message
+  
+  gz_sensor_msgs::JointState gz_joint_state_msg;
+
+  ConvertHeaderRosToGz(ros_joint_state_msg_ptr->header,
+                       gz_joint_state_msg.mutable_header());
+
+  for (int i = 0; i < ros_joint_state_msg_ptr->position.size(); i++) {
+    gz_joint_state_msg.add_position(
+        ros_joint_state_msg_ptr->position[i]);
+  }
+
+  for (int i = 0; i < ros_joint_state_msg_ptr->name.size(); i++) {
+    gz_joint_state_msg.add_name(
+        ros_joint_state_msg_ptr->name[i]);
+  }
+
+  // Publish to Gazebo
+  gz_publisher_ptr->Publish(gz_joint_state_msg);
+}
+
 void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
     const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {

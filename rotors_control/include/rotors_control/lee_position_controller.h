@@ -61,6 +61,9 @@ class LeePositionController {
   void InitializeParameters();
   void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
 
+#if (_DEBUG_TORQUE_THRUST_)
+  void CalculateTorqueThrust(Eigen::Vector4d* torque_thrust) const;
+#endif
   void SetOdometry(const EigenOdometry& odometry);
   void SetTrajectoryPoint(
     const mav_msgs::EigenTrajectoryPoint& command_trajectory);
@@ -80,9 +83,16 @@ class LeePositionController {
   mav_msgs::EigenTrajectoryPoint command_trajectory_;
   EigenOdometry odometry_;
 
+#if (_DEBUG_TORQUE_THRUST_)
+  void ComputeDesiredTorque(const Eigen::Vector3d& acceleration, Eigen::Vector3d* desired_torque) const;
+#endif
+
   void ComputeDesiredAngularAcc(const Eigen::Vector3d& acceleration,
                                 Eigen::Vector3d* angular_acceleration) const;
   void ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const;
+
+
+
 };
 }
 

@@ -44,6 +44,11 @@ LeePositionControllerNode::LeePositionControllerNode(
   odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
                                &LeePositionControllerNode::OdometryCallback, this);
 
+#if (_DEBUG_TORQUE_THRUST_)
+  torque_thrust_reference_pub_ = nh_.advertise<mav_msgs::TorqueThrust>(
+      kDefaultCommandTorqueThrustTopic, 1);
+#endif
+
   motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(
       mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
@@ -178,6 +183,24 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
   eigenOdometryFromMsg(odometry_msg, &odometry);
   lee_position_controller_.SetOdometry(odometry);
 
+#if (_DEBUG_TORQUE_THRUST_)
+  Eigen::Vector4d ref_torque_thrust;
+  lee_position_controller_.CalculateTorqueThrust(&ref_torque_thrust);
+
+  //torque_thrust_msg is in FLU frame
+  mav_msgs::TorqueThrustPtr torque_thrust_msg(new mav_msgs::TorqueThrust);
+
+  torque_thrust_msg->torque.x=ref_torque_thrust(0);
+  torque_thrust_msg->torque.y=ref_torque_thrust(1);
+  torque_thrust_msg->torque.z=ref_torque_thrust(2);
+  torque_thrust_msg->thrust.x=0;
+  torque_thrust_msg->thrust.y=0;
+  torque_thrust_msg->thrust.z=ref_torque_thrust(3);
+  torque_thrust_msg->header.stamp = odometry_msg->header.stamp;
+
+  torque_thrust_reference_pub_.publish(torque_thrust_msg);
+#endif 
+#if (!_DEBUG_TORQUE_THRUST_)
   Eigen::VectorXd ref_rotor_velocities;
   lee_position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
@@ -190,6 +213,8 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
   actuator_msg->header.stamp = odometry_msg->header.stamp;
 
   motor_velocity_reference_pub_.publish(actuator_msg);
+#endif
+
 }
 
 }
