@@ -22,22 +22,29 @@
 #include <chrono>
 
 #include <Eigen/Core>
+#include <std_msgs/Float64.h>
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-
 double x=0,y=0,z=1,yaw=0;
+double vx=0,vy=0,vz=0,yawrate=0;
 
-void PoseCallback(const mav_msgs::RollPitchYawrateThrustConstPtr& pose_reference_msg){
-  x=pose_reference_msg->thrust.x;
-  y=pose_reference_msg->thrust.y;
-  z=pose_reference_msg->thrust.z;
-  yaw=pose_reference_msg->yaw_rate;
-
+void zCallback(const std_msgs::Float64::ConstPtr& msg){
+  vz=msg->data;
 };
+void yawrateCallback(const std_msgs::Float64::ConstPtr& msg){
+  yawrate=msg->data;
+};
+void pitchCallback(const std_msgs::Float64::ConstPtr& msg){
+  vy=msg->data;
+};
+void rollCallback(const std_msgs::Float64::ConstPtr& msg){
+  vx=msg->data;
+};
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
@@ -47,9 +54,12 @@ int main(int argc, char** argv) {
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
           mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
 
-  ros::Subscriber pose_sub = nh.subscribe( "/Pose_M600", 1, &PoseCallback);
+  ros::Subscriber z_sub = nh.subscribe( "/drone_control/thrust", 1, &zCallback);
+  ros::Subscriber yawrate_sub = nh.subscribe( "/drone_control/yawrate", 1, &yawrateCallback);
+  ros::Subscriber pitch_sub = nh.subscribe( "/drone_control/pitch", 1, &pitchCallback);
+  ros::Subscriber roll_sub = nh.subscribe( "/drone_control/roll", 1, &rollCallback);
 
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(50);
   ROS_INFO("Started hovering example.");
 
   std_srvs::Empty srv;
@@ -100,10 +110,15 @@ int main(int argc, char** argv) {
 
   trajectory_msg.header.stamp = ros::Time::now();
 
+  z+= vz*0.02;
+  yaw+= yawrate*0.02;
+  x+= vx*0.02;
+  y+= vy*0.02;
+
   // Default desired position and yaw.
   desired_position(0)=x;
-    desired_position(1)=y;
-      desired_position(2)=z;
+  desired_position(1)=y;
+  desired_position(2)=z;
    desired_yaw = yaw;
 
   mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(

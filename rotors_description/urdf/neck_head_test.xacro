@@ -1,164 +1,172 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="head_test" xmlns:xacro="http://ros.org/wiki/xacro">
 
-<xacro:macro name="neck_head_macro"
-  params="robot_namespace parent_link">
+<!-- <xacro:macro name="neck_head_macro"
+  params="robot_namespace parent_link"> -->
  
 <gazebo>
   <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-    <robotNamespace>${robot_namespace}</robotNamespace>
+    <robotNamespace>/head_test</robotNamespace>
   </plugin>
 </gazebo>
 
 
-<xacro:property name="PI" value="3.1415926535897931"/>
 
-
-<joint name="DJI_leg_joint" type="fixed">
-	<parent link="${parent_link}"/>
-	<child link="DJI_leg_link"/>
-	<origin rpy="${PI} 0 0" xyz="0 y z"/>
+<link name="world">
+</link>
+<joint name="DJI_connect_joint" type="fixed">
+	<parent link="world"/>
+	<child link="DJI_connect_link"/>
+	<origin rpy="${pi+0.0873} 0 0" xyz="0 -74.58e-3 1"/>
 </joint>
 
-<link name="DJI_leg_link">
+<link name="DJI_connect_link">
 	<visual>
-		<origin rpy="0 0 0" xyz="0 0 0"/>
-		<geometry>
-		<mesh filename="" scale="0.001 0.001 0.001"/>
-		</geometry>
+      <origin xyz="0 79e-3 13.5e-3" rpy="0 0 0"/>
+      <geometry>
+	      <box size="80e-3 158e-3 27e-3"/>
+      </geometry>
 	</visual>
 
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 79e-3 13.5e-3" rpy="0 0 0"/>
       <geometry>
-
+	      <box size="80e-3 158e-3 27e-3"/>
       </geometry>
     </collision>
 
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0"/>
+      <origin xyz="0 81.25e-3 13.5e-3" rpy="0 0 0"/>
+      <mass value="0.05"/>
       <inertia
-        ixx="" ixy="0.0" ixz="0.0"
-        iyy="" iyz="0.0"
-        izz=""/>
+        ixx="${0.05/12*(158e-3*158e-3+27e-3*27e-3)}" ixy="0.0" ixz="0.0"
+        iyy="${0.05/12*(27e-3*27e-3+80e-3*80e-3)}" iyz="0.0"
+        izz="${0.05/12*(158e-3*158e-3+80e-3*80e-3)}"/>
     </inertial>
 </link>
 
 <joint name="neck_base_joint" type="fixed">
-	<parent link="DJI_leg_link"/>
+	<parent link="DJI_connect_link"/>
 	<child link="neck_base_link"/>
-	<origin rpy="0 0 0" xyz="0 y z"/>
+	<origin rpy="0 0 0" xyz="0 117e-3 27e-3"/>
 </joint>
 
 <link name="neck_base_link">
 	<visual>
-		<origin rpy="0 0 0" xyz="0 0 0"/>
-		<geometry>
-		<mesh filename="" scale="0.001 0.001 0.001"/>
-		</geometry>
+      <origin xyz="0 0 40e-3" rpy="0 0 0"/>
+      <geometry>
+        <box size="80e-3 80e-3 80e-3"/>
+      </geometry>
 	</visual>
 
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 40e-3" rpy="0 0 0"/>
       <geometry>
-
+        <box size="80e-3 80e-3 80e-3"/>
       </geometry>
     </collision>
 
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0"/>
+      <origin xyz="-1.6749134e-05 1.3880927e-3 3.2904335e-2" rpy="-0.3776 -0.0858 1.5403"/>
+      <mass value="0.454"/>
       <inertia
-        ixx="" ixy="0.0" ixz="0.0"
-        iyy="" iyz="0.0"
-        izz=""/>
+        ixx="1.6874028e-4" ixy="0.0" ixz="0.0"
+        iyy="1.7773673e-4" iyz="0.0"
+        izz="1.8020647e-4"/>
     </inertial>
 </link>
 
-<joint name="neck_joint_1" type="fixed">
+<joint name="neck_joint_1" type="revolute">
+ 	<axis xyz="0 1 0"/>
+ 	<limit effort="1000.0" lower="${-pi}" upper="${pi}" velocity="1"/>
 	<parent link="neck_base_link"/>
 	<child link="neck_link_1"/>
-	<origin rpy="0 0 0" xyz="0 y z"/>
+	<origin rpy="0 0 0" xyz="0 45.5e-3 34e-3"/>
+  <dynamics damping="1e-5" friction="1e-5"/>
 </joint>
 
 <link name="neck_link_1">
 	<visual>
-		<origin rpy="0 0 0" xyz="0 0 0"/>
-		<geometry>
-		<mesh filename="" scale="0.001 0.001 0.001"/>
-		</geometry>
+      <origin xyz="0 -2.75e-3 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="80e-3 5.5e-3 80e-3"/>
+      </geometry>
 	</visual>
 
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 -2.75e-3 0" rpy="0 0 0"/>
       <geometry>
-
+        <box size="80e-3 5.5e-3 80e-3"/>
       </geometry>
     </collision>
 
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0"/>
+      <origin xyz="7.3157519e-3 2.6015782e-2 0" rpy="0 0 0.5020"/>
+      <mass value="0.0866"/>
       <inertia
-        ixx="" ixy="0.0" ixz="0.0"
-        iyy="" iyz="0.0"
-        izz=""/>
+        ixx="6.8361134e-5" ixy="0.0" ixz="0.0"
+        iyy="1.1299140e-4" iyz="0.0"
+        izz="1.3810438e-4"/>
     </inertial>
 </link>
 
-<joint name="neck_joint_2" type="fixed">
+<joint name="neck_joint_2" type="revolute">
+ 	<axis xyz="1 0 0"/>
+ 	<limit effort="1000.0" lower="${-pi/2}" upper="${pi/2}" velocity="1"/>
 	<parent link="neck_link_1"/>
 	<child link="head_link"/>
-	<origin rpy="${PI} 0 0" xyz="0 y z"/>
+	<origin rpy="0 0 0" xyz="0 56e-3 0"/>
+  <dynamics damping="1e-5" friction="1e-5"/>
 </joint>
 
 <link name="head_link">
 	<visual>
-		<origin rpy="0 0 0" xyz="0 0 0"/>
-		<geometry>
-		<mesh filename="" scale="0.001 0.001 0.001"/>
-		</geometry>
+      <origin xyz="0 40e-3 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="60e-3"/>
+      </geometry>
 	</visual>
 
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 40e-3 0" rpy="0 0 0"/>
       <geometry>
-
+        <sphere radius="60e-3"/>
       </geometry>
     </collision>
 
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0"/>
+      <origin xyz="1.6724729e-04 2.5974293e-2 1.6809604e-2" rpy="1.5708 -0.0334 0"/>
+      <mass value="0.95"/>
       <inertia
-        ixx="" ixy="0.0" ixz="0.0"
-        iyy="" iyz="0.0"
-        izz=""/>
+        ixx="1.4514462e-3" ixy="0.0" ixz="0.0"
+        iyy="2.0518578e-3" iyz="0.0"
+        izz="2.1893905e-3"/>
     </inertial>
 </link>
 
+ <xacro:property name="camera_link" value="0.05" /> <!-- Size of square 'camera' box -->
+
 <joint name="eye_joint" type="fixed">
+  <axis xyz="0 1 0" />
 	<parent link="head_link"/>
 	<child link="left_camera_frame"/>
-	<origin rpy="0 0 ${PI/2}" xyz="0 y z"/>
+	<origin rpy="${-pi/2} ${-pi/2} 0" xyz="31e-3 46.83e-3 81.95e-3"/>
 </joint>
 
   <!-- Camera -->
   <link name="left_camera_frame">
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="-15.25e-3 -31e-3 0 " rpy="0 0 0"/>
       <geometry>
-	<box size="${camera_link} ${camera_link} ${camera_link}"/>
+	      <box size="30.5e-3 124.5e-3 26.5e-3 "/>
       </geometry>
     </collision>
 
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz=" -15.25e-3 -31e-3 0" rpy="0 0 0"/>
       <geometry>
-	<box size="${camera_link} ${camera_link} ${camera_link}"/>
+	      <box size="30.5e-3 124.5e-3 26.5e-3"/>
       </geometry>
-      <material name="red"/>
     </visual>
 
     <inertial>
@@ -203,7 +211,7 @@
         </noise>
       </camera>
       <camera name="right">
-        <pose>0 -0.07 0 0 0 0</pose>
+        <pose>0 -0.060 0 0 0 0</pose>
         <horizontal_fov>1.3962634</horizontal_fov>
         <image>
           <width>800</width>
@@ -259,6 +267,5 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
-
-</xacro:macro>
+<!-- </xacro:macro>  -->
 </robot>

@@ -25,6 +25,8 @@
 
 #include "rotors_control/parameters_ros.h"
 
+#define _TUNE_PARAMETERS_ 1
+
 namespace rotors_control {
 
 LeePositionControllerNode::LeePositionControllerNode(
@@ -182,6 +184,11 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
   EigenOdometry odometry;
   eigenOdometryFromMsg(odometry_msg, &odometry);
   lee_position_controller_.SetOdometry(odometry);
+
+
+#if (_TUNE_PARAMETERS_)
+  lee_position_controller_.InitializeParameters();
+#endif
 
 #if (_DEBUG_TORQUE_THRUST_)
   Eigen::Vector4d ref_torque_thrust;

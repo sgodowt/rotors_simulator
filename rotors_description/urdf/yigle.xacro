@@ -55,6 +55,7 @@
   <!-- Included URDF Files -->
   <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
   <xacro:include filename="$(find rotors_description)/urdf/arm_base.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/head_base.xacro" />
 
   <!-- Instantiate multirotor_base_macro once -->
   <xacro:multirotor_base_macro
@@ -203,5 +204,9 @@
     robot_namespace="${namespace}"
     parent_link="${namespace}/base_link">
   </xacro:arm_base_macro>
+
+  <xacro:neck_head_macro
+    parent_link="${namespace}/base_link">
+  </xacro:neck_head_macro>
 
 </robot>

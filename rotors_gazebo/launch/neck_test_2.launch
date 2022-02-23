@@ -1,0 +1,9 @@
+<launch>
+
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder   '$(find rotors_description)/urdf/neck_head_test.xacro'" />
+
+
+
+ 
+</launch>

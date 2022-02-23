@@ -4,14 +4,14 @@
     "mainwindow": {
       "keys": {
         "geometry": {
-          "repr(QByteArray.hex)": "QtCore.QByteArray(b'01d9d0cb00030000000000000000001b0000077f0000043700000000000000400000077f000004370000000000000000078000000000000000400000077f00000437')",
+          "repr(QByteArray.hex)": "QtCore.QByteArray(b'01d9d0cb00030000000000480000001b0000077f0000043700000048000000400000077f000004370000000000000000078000000048000000400000077f00000437')",
           "type": "repr(QByteArray.hex)",
-          "pretty-print": "           7   @   7        @   7"
+          "pretty-print": "     H     7 H @   7      H @   7"
         },
         "state": {
-          "repr(QByteArray.hex)": "QtCore.QByteArray(b'000000ff00000000fd000000010000000300000780000003ccfc0100000002fc00000000000004460000023d00fffffffc0200000002fb00000042007200710074005f0070006c006f0074005f005f0050006c006f0074005f005f0032005f005f00440061007400610050006c006f007400570069006400670065007401000000160000017f0000008a00fffffffc0000019b00000247000000a90100001cfa000000010200000002fb00000042007200710074005f0070006c006f0074005f005f0050006c006f0074005f005f0031005f005f00440061007400610050006c006f00740057006900640067006500740100000000ffffffff0000008a00fffffffb00000058007200710074005f007000750062006c00690073006800650072005f005f005000750062006c00690073006800650072005f005f0031005f005f005000750062006c006900730068006500720057006900640067006500740100000016000002c40000008c00fffffffb0000006c007200710074005f007200650063006f006e006600690067007500720065005f005f0050006100720061006d005f005f0031005f005f005f0070006c007500670069006e0063006f006e007400610069006e00650072005f0074006f0070005f007700690064006700650074010000044c000003340000010900ffffff000007800000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
+          "repr(QByteArray.hex)": "QtCore.QByteArray(b'000000ff00000000fd000000010000000300000738000003ccfc0100000002fc000000000000041d0000023d00fffffffc0200000002fb00000042007200710074005f0070006c006f0074005f005f0050006c006f0074005f005f0032005f005f00440061007400610050006c006f007400570069006400670065007401000000160000017f0000008a00fffffffc0000019b00000247000000a90100001cfa000000010200000002fb00000042007200710074005f0070006c006f0074005f005f0050006c006f0074005f005f0031005f005f00440061007400610050006c006f00740057006900640067006500740100000000ffffffff0000008a00fffffffb00000058007200710074005f007000750062006c00690073006800650072005f005f005000750062006c00690073006800650072005f005f0031005f005f005000750062006c006900730068006500720057006900640067006500740100000016000002c40000008c00fffffffb0000006c007200710074005f007200650063006f006e006600690067007500720065005f005f0050006100720061006d005f005f0031005f005f005f0070006c007500670069006e0063006f006e007400610069006e00650072005f0074006f0070005f0077006900640067006500740100000423000003150000010900ffffff000007380000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
           "type": "repr(QByteArray.hex)",
-          "pretty-print": "                   F =                                                                Brqt_plot__Plot__1__DataPlotWidget          Xrqt_publisher__Publisher__1__PublisherWidget          lrqt_reconfigure__Param__1___plugincontainer_top_widget                            6MinimizedDockWidgetsToolbar        "
+          "pretty-print": "                     =                                                                Brqt_plot__Plot__1__DataPlotWidget          Xrqt_publisher__Publisher__1__PublisherWidget          lrqt_reconfigure__Param__1___plugincontainer_top_widget                            6MinimizedDockWidgetsToolbar        "
         }
       },
       "groups": {
@@ -112,15 +112,15 @@
                   "type": "repr"
                 },
                 "topics": {
-                  "repr": "''",
+                  "repr": "'/arm/joint0_position_controller_right/state/error'",
                   "type": "repr"
                 },
                 "x_limits": {
-                  "repr": "[92.202, 93.202]",
+                  "repr": "[474.59713744718033, 474.672]",
                   "type": "repr"
                 },
                 "y_limits": {
-                  "repr": "[-6.2820140743393384, 1.5699622777554008]",
+                  "repr": "[-0.023901902525176766, 0.03550668746576946]",
                   "type": "repr"
                 }
               },
@@ -151,7 +151,7 @@
             "plugin": {
               "keys": {
                 "publishers": {
-                  "repr": "\"[{'topic_name': '/arm/joint0_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 1.0, 'enabled': False, 'publisher_id': 14, 'counter': 0, 'expressions': {}}, {'topic_name': '/arm/joint1_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 1.0, 'enabled': False, 'publisher_id': 15, 'counter': 0, 'expressions': {}}, {'topic_name': '/arm/joint2_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 1.0, 'enabled': False, 'publisher_id': 16, 'counter': 0, 'expressions': {}}, {'topic_name': '/arm/joint3_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 1.0, 'enabled': False, 'publisher_id': 17, 'counter': 0, 'expressions': {}}, {'topic_name': '/arm/joint4_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 1.0, 'enabled': False, 'publisher_id': 18, 'counter': 0, 'expressions': {}}]\"",
+                  "repr": "\"[{'topic_name': '/arm/joint0_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 100.0, 'enabled': False, 'publisher_id': 0, 'counter': 19069, 'expressions': {'/arm/joint0_position_controller_right/command/data': '1.57*sin(i/100*2*3.14*0.167)'}}, {'topic_name': '/arm/joint1_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 100.0, 'enabled': False, 'publisher_id': 1, 'counter': 13182, 'expressions': {'/arm/joint1_position_controller_right/command/data': '-0.78*cos(i/100*2*3.14*0.167)+0.78'}}, {'topic_name': '/arm/joint2_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 100.0, 'enabled': False, 'publisher_id': 2, 'counter': 10858, 'expressions': {'/arm/joint2_position_controller_right/command/data': '0.78*cos(i/100*2*3.14*0.167)-0.78'}}, {'topic_name': '/arm/joint3_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 100.0, 'enabled': False, 'publisher_id': 3, 'counter': 9622, 'expressions': {'/arm/joint3_position_controller_right/command/data': '-0.78*cos(i/100*2*3.14*0.167)+0.78'}}, {'topic_name': '/arm/joint4_position_controller_right/command', 'type_name': 'std_msgs/Float64', 'rate': 100.0, 'enabled': False, 'publisher_id': 4, 'counter': 8907, 'expressions': {'/arm/joint4_position_controller_right/command/data': '1.57*sin(i/100*2*3.14*0.167)'}}]\"",
                   "type": "repr"
                 }
               },
@@ -187,7 +187,7 @@
                   "pretty-print": "       , d     "
                 },
                 "expanded_nodes": {
-                  "repr": "['/arm', '/arm/joint4_position_controller_right', '/arm', '/arm', '/arm/joint3_position_controller_right', '/arm', '/arm', '/arm', '/arm/joint0_position_controller_left', '/arm', '/arm/joint0_position_controller_right', '/arm/joint1_position_controller_right', '/arm/joint2_position_controller_right', '/gazebo']",
+                  "repr": "['/arm', '/arm/joint0_position_controller_right', '/arm/joint1_position_controller_right', '/arm/joint2_position_controller_right', '/arm/joint3_position_controller_right', '/arm/joint4_position_controller_right', '/gazebo']",
                   "type": "repr"
                 },
                 "selected_nodes": {
