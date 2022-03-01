@@ -391,7 +391,7 @@
 	<visual>
 		<origin rpy="0 0 0 " xyz="0 0 0"/>
 		<geometry>
-    <mesh filename="package://rotors_description/meshes/arm/hand.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="package://rotors_description/meshes/arm/hand_right.stl" scale="0.001 0.001 0.001"/>
     </geometry>
 		<material name = "black"/>
 	</visual>
@@ -623,7 +623,7 @@
 	<visual>
 		<origin rpy="0 0 0 " xyz="0 0 0"/>
 		<geometry>
-    <mesh filename="package://rotors_description/meshes/arm/hand.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="package://rotors_description/meshes/arm/hand_left.stl" scale="0.001 0.001 0.001"/>
     </geometry>
 		<material name = "black"/>
 	</visual>

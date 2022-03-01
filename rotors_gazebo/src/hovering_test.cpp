@@ -21,6 +21,7 @@
 #include <thread>
 #include <chrono>
 
+#include <cmath> 
 #include <Eigen/Core>
 #include <std_msgs/Float64.h>
 #include <mav_msgs/conversions.h>
@@ -36,13 +37,13 @@ void zCallback(const std_msgs::Float64::ConstPtr& msg){
   vz=msg->data;
 };
 void yawrateCallback(const std_msgs::Float64::ConstPtr& msg){
-  yawrate=msg->data;
+  yawrate=-msg->data;
 };
 void pitchCallback(const std_msgs::Float64::ConstPtr& msg){
-  vy=msg->data;
+  vx=msg->data;
 };
 void rollCallback(const std_msgs::Float64::ConstPtr& msg){
-  vx=msg->data;
+  vy=-msg->data;
 };
 
 int main(int argc, char** argv) {
@@ -54,10 +55,10 @@ int main(int argc, char** argv) {
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
           mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
 
-  ros::Subscriber z_sub = nh.subscribe( "/drone_control/thrust", 1, &zCallback);
-  ros::Subscriber yawrate_sub = nh.subscribe( "/drone_control/yawrate", 1, &yawrateCallback);
-  ros::Subscriber pitch_sub = nh.subscribe( "/drone_control/pitch", 1, &pitchCallback);
-  ros::Subscriber roll_sub = nh.subscribe( "/drone_control/roll", 1, &rollCallback);
+  ros::Subscriber z_sub = nh.subscribe( "/LH_joy_y", 1, &zCallback);
+  ros::Subscriber yawrate_sub = nh.subscribe( "/LH_joy_x", 1, &yawrateCallback);
+  ros::Subscriber pitch_sub = nh.subscribe( "/RH_joy_y", 1, &pitchCallback);
+  ros::Subscriber roll_sub = nh.subscribe( "/RH_joy_x", 1, &rollCallback);
 
   ros::Rate loop_rate(50);
   ROS_INFO("Started hovering example.");
@@ -82,7 +83,7 @@ int main(int argc, char** argv) {
   }
 
   // Wait for 5 seconds to let the Gazebo GUI show up.
-  ros::Duration(5.0).sleep();
+  //ros::Duration(5.0).sleep();
 
   trajectory_msgs::MultiDOFJointTrajectory trajectory_msg;
   trajectory_msg.header.stamp = ros::Time::now();
@@ -110,11 +111,15 @@ int main(int argc, char** argv) {
 
   trajectory_msg.header.stamp = ros::Time::now();
 
-  z+= vz*0.02;
-  yaw+= yawrate*0.02;
-  x+= vx*0.02;
-  y+= vy*0.02;
+  double vx_n=0,vy_n=0;
 
+  vx_n=vx*sin(yaw)+vy*cos(yaw);
+  vy_n=vy*sin(yaw)-vx*cos(yaw);  
+  x+= vx_n*0.1*0.02;
+  y+= vy_n*0.1*0.02;
+
+  z+= vz*0.1*0.02;
+  yaw+= yawrate*0.1*0.02;
   // Default desired position and yaw.
   desired_position(0)=x;
   desired_position(1)=y;
@@ -124,9 +129,6 @@ int main(int argc, char** argv) {
   mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(
       desired_position, desired_yaw, &trajectory_msg);
 
-  ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
-           nh.getNamespace().c_str(), desired_position.x(),
-           desired_position.y(), desired_position.z());
   trajectory_pub.publish(trajectory_msg);
     
     ros::spinOnce();

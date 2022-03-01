@@ -194,7 +194,7 @@
  	<limit effort="1000.0" lower="-3.14" upper="3.14" velocity="1"/>
 	<parent link="Link_three_right"/>
 	<child link="Link_hand_right"/>
-	<origin xyz="0 0 0.1502"/>
+	<origin xyz="0 0 0.1502" rpy="0 0 ${pi/2}"/>
   <dynamics damping="${damping}" friction="${friction}"/>
 </joint>
 
@@ -202,14 +202,43 @@
 	<visual>
 		<origin rpy="0 0 0 " xyz="0 0 0"/>
 		<geometry>
-    <mesh filename="package://rotors_description/meshes/arm/hand.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="package://rotors_description/meshes/arm/hand_right.stl" scale="0.001 0.001 0.001"/>
     </geometry>
 	</visual>
 
     <collision>
+
+      <surface>
+            <!-- <contact>
+              <ode>
+                <max_vel>10</max_vel>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>         -->
+
+        <friction>
+          <ode>
+            <mu>5</mu>
+            <mu2>5</mu2>
+            <kp value="10000000.0" />
+			      <kd value="1.0" />
+          </ode>
+        </friction>
+        <!-- <soft_contact>
+          <dart>
+            <bone_attachment>100
+            </bone_attachment>
+            <stiffness>100
+            </stiffness>
+            <damping>10
+            </damping>
+          </dart>
+        </soft_contact> -->
+      </surface>
+
       <origin xyz="0 0 102.556e-3" rpy="0 0 0"/>
       <geometry>
-        <box size="41e-3 54e-3 205.122e-3"/>
+        <box size="80e-3 36e-3 205.122e-3"/>
       </geometry>
     </collision>
 
@@ -401,7 +430,7 @@
  	<limit effort="1000.0" lower="-3.14" upper="3.14" velocity="1"/>
 	<parent link="Link_three_left"/>
 	<child link="Link_hand_left"/>
-	<origin xyz="0 0 0.1502"/>
+	<origin xyz="0 0 0.1502" rpy="0 0 ${-pi/2}"/>
   <dynamics damping="${damping}" friction="${friction}"/>
 
 </joint>
@@ -410,14 +439,40 @@
 	<visual>
 		<origin rpy="0 0 0 " xyz="0 0 0"/>
 		<geometry>
-    <mesh filename="package://rotors_description/meshes/arm/hand.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="package://rotors_description/meshes/arm/hand_left.stl" scale="0.001 0.001 0.001"/>
     </geometry>
 	</visual>
 
     <collision>
+
+      <surface>
+        <friction>
+          <ode>
+            <mu>5</mu>
+            <mu2>5</mu2>
+            			<kp value="10000000.0" />
+			<kd value="1.0" />
+          </ode>
+        </friction>
+
+        <!-- <soft_contact>
+          <dart>
+            <bone_attachment>100
+            </bone_attachment>
+            <stiffness>100
+            </stiffness>
+            <damping>10
+            </damping>
+          </dart>
+        </soft_contact> -->
+
+      </surface>
+
+
+
       <origin xyz="0 0 102.556e-3" rpy="0 0 0"/>
       <geometry>
-        <box size="41e-3 54e-3 205.122e-3"/>
+        <box size="80e-3 36e-3 205.122e-3"/>
       </geometry>
     </collision>
 

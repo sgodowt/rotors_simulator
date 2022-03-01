@@ -196,8 +196,8 @@
       <camera name="left">
         <horizontal_fov>1.3962634</horizontal_fov>
         <image>
-          <width>800</width>
-          <height>800</height>
+          <width>1280</width>
+          <height>720</height>
           <format>R8G8B8</format>
         </image>
         <clip>
@@ -211,11 +211,11 @@
         </noise>
       </camera>
       <camera name="right">
-        <pose>0 -0.060 0 0 0 0</pose>
+        <pose>0 -0.070 0 0 0 0</pose>
         <horizontal_fov>1.3962634</horizontal_fov>
         <image>
-          <width>800</width>
-          <height>800</height>
+          <width>1280</width>
+          <height>720</height>
           <format>R8G8B8</format>
         </image>
         <clip>
@@ -231,7 +231,7 @@
       <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
         <alwaysOn>true</alwaysOn>
         <updateRate>0.0</updateRate>
-        <cameraName>multisense_sl/camera</cameraName>
+        <cameraName>camera</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
         <frameName>left_camera_optical_frame</frameName>
