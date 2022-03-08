@@ -4,6 +4,7 @@ package gz_std_msgs;
 // Message designed to be sent to the ROS interface plugin by other
 // Gazebo plugins, to tell it to forward messages on a particular ROS topic onto
 // a Gazebo topic
+// modified NMMI 2022
 message ConnectRosToGazeboTopic
 {
   required string ros_topic = 1;
@@ -17,6 +18,8 @@ message ConnectRosToGazeboTopic
   	COMMAND_MOTOR_SPEED = 1;
   	ROLL_PITCH_YAWRATE_THRUST = 2;
   	WIND_SPEED = 3;
+    TORQUE_THRUST = 4;
+    JOINT_STATE = 5;
   }
-  required MsgType msgType = 4;
+  required MsgType msgType = 6;
 }

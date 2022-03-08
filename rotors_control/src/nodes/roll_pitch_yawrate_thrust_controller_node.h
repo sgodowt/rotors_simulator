@@ -1,4 +1,6 @@
 /*
+ * Modifications Copyright 2022 Fanyi Kong, NMMI, Italy
+
  * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
@@ -35,35 +37,36 @@
 #include "rotors_control/common.h"
 #include "rotors_control/roll_pitch_yawrate_thrust_controller.h"
 
-namespace rotors_control {
+namespace rotors_control
+{
 
-class RollPitchYawrateThrustControllerNode {
- public:
-  RollPitchYawrateThrustControllerNode();
-  ~RollPitchYawrateThrustControllerNode();
+  class RollPitchYawrateThrustControllerNode
+  {
+  public:
+    RollPitchYawrateThrustControllerNode();
+    ~RollPitchYawrateThrustControllerNode();
 
-  void InitializeParams();
-  void Publish();
+    void InitializeParams();
+    void Publish();
 
- private:
+  private:
+    RollPitchYawrateThrustController roll_pitch_yawrate_thrust_controller_;
 
-  RollPitchYawrateThrustController roll_pitch_yawrate_thrust_controller_;
+    std::string namespace_;
 
-  std::string namespace_;
-
-  // subscribers
-  ros::Subscriber cmd_roll_pitch_yawrate_thrust_sub_;
-  ros::Subscriber odometry_sub_;
+    // subscribers
+    ros::Subscriber cmd_roll_pitch_yawrate_thrust_sub_;
+    ros::Subscriber odometry_sub_;
 #if (_DEBUG_TORQUE_THRUST_)
-  ros::Publisher torque_thrust_reference_pub_;
+    ros::Publisher torque_thrust_reference_pub_;
 #endif
-  ros::Publisher motor_velocity_reference_pub_;
+    ros::Publisher motor_velocity_reference_pub_;
 
-  void RollPitchYawrateThrustCallback(
-      const mav_msgs::RollPitchYawrateThrustConstPtr& roll_pitch_yawrate_thrust_reference_msg);
+    void RollPitchYawrateThrustCallback(
+        const mav_msgs::RollPitchYawrateThrustConstPtr &roll_pitch_yawrate_thrust_reference_msg);
 
-  void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
-};
+    void OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg);
+  };
 }
 
 #endif // ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H

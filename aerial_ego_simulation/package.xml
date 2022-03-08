@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>aerial_ego_simulation</name>
+  <version>1.0.0</version>
+  <description>The aerial_ego_simulation package</description>
+
+  <maintainer email="kong.fanyi95@gmail.com">Fanyi Kong</maintainer>
+
+  <license>BSD 3-Clause License</license>
+  
+  <author>Fanyi Kong</author>
+  <author>NMMI</author>
+  <author>Istituto Italiano di Tecnologia, Soft Robotics for Human Cooperation and Rehabilitation Lab</author>
+  <author>Centro di Ricerca E. Piaggio</author>
+
+  <url type="website">https://github.com/NMMI/aerial-alter-ego-simulator</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>cmake_modules</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+
+</package>

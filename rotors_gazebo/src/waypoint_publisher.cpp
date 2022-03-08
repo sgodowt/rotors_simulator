@@ -27,12 +27,13 @@
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "waypoint_publisher");
   ros::NodeHandle nh;
   ros::Publisher trajectory_pub =
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
-      mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
+          mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
 
   ROS_INFO("Started waypoint_publisher.");
 
@@ -41,11 +42,16 @@ int main(int argc, char** argv) {
 
   double delay;
 
-  if (args.size() == 5) {
+  if (args.size() == 5)
+  {
     delay = 1.0;
-  } else if (args.size() == 6) {
+  }
+  else if (args.size() == 6)
+  {
     delay = std::stof(args.at(5));
-  } else {
+  }
+  else
+  {
     ROS_ERROR("Usage: waypoint_publisher <x> <y> <z> <yaw_deg> [<delay>]\n");
     return -1;
   }
@@ -61,12 +67,13 @@ int main(int argc, char** argv) {
   double desired_yaw = std::stof(args.at(4)) * DEG_2_RAD;
 
   mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(desired_position,
-      desired_yaw, &trajectory_msg);
+                                                      desired_yaw, &trajectory_msg);
 
   // Wait for some time to create the ros publisher.
   ros::Duration(delay).sleep();
 
-  while (trajectory_pub.getNumSubscribers() == 0 && ros::ok()) {
+  while (trajectory_pub.getNumSubscribers() == 0 && ros::ok())
+  {
     ROS_INFO("There is no subscriber available, trying again in 1 second.");
     ros::Duration(1.0).sleep();
   }

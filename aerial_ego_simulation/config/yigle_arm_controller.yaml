@@ -1,0 +1,56 @@
+yigle: # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+
+  # Position Controllers ---------------------------------------
+  joint0_position_controller_right:
+    type: effort_controllers/JointPositionController
+    joint: Joint_shoulder_right
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint1_position_controller_right:
+    type: effort_controllers/JointPositionController
+    joint: Joint_1_right
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint2_position_controller_right:
+    type: effort_controllers/JointPositionController
+    joint: Joint_2_right
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint3_position_controller_right:
+    type: effort_controllers/JointPositionController
+    joint: Joint_3_right
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint4_position_controller_right:
+    type: effort_controllers/JointPositionController
+    joint: Joint_wrist_right
+    pid: { p: 30, i: 0, d: 0.1 }
+
+  joint0_position_controller_left:
+    type: effort_controllers/JointPositionController
+    joint: Joint_shoulder_left
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint1_position_controller_left:
+    type: effort_controllers/JointPositionController
+    joint: Joint_1_left
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint2_position_controller_left:
+    type: effort_controllers/JointPositionController
+    joint: Joint_2_left
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint3_position_controller_left:
+    type: effort_controllers/JointPositionController
+    joint: Joint_3_left
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint4_position_controller_left:
+    type: effort_controllers/JointPositionController
+    joint: Joint_wrist_left
+    pid: { p: 30, i: 0, d: 0.1 }
+
+  joint_position_controller_neck_1:
+    type: effort_controllers/JointPositionController
+    joint: neck_joint_1
+    pid: { p: 30, i: 0, d: 0.1 }
+  joint_position_controller_neck_2:
+    type: effort_controllers/JointPositionController
+    joint: neck_joint_2
+    pid: { p: 30, i: 0, d: 0.1 }

@@ -1,4 +1,6 @@
 /*
+ * Modifications Copyright 2022 Fanyi Kong, NMMI, Italy
+
  * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
@@ -28,7 +30,8 @@
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
   // Create a private node handle for accessing node parameters.
@@ -43,17 +46,21 @@ int main(int argc, char** argv) {
   unsigned int i = 0;
 
   // Trying to unpause Gazebo for 10 seconds.
-  while (i <= 10 && !unpaused) {
+  while (i <= 10 && !unpaused)
+  {
     ROS_INFO("Wait for 1 second before trying to unpause Gazebo again.");
     std::this_thread::sleep_for(std::chrono::seconds(1));
     unpaused = ros::service::call("/gazebo/unpause_physics", srv);
     ++i;
   }
 
-  if (!unpaused) {
+  if (!unpaused)
+  {
     ROS_FATAL("Could not wake up Gazebo.");
     return -1;
-  } else {
+  }
+  else
+  {
     ROS_INFO("Unpaused the Gazebo simulation.");
   }
 

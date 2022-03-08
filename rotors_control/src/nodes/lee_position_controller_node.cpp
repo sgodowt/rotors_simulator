@@ -1,4 +1,6 @@
 /*
+ * Modifications Copyright 2022 Fanyi Kong, NMMI, Italy
+
  * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
@@ -27,206 +29,218 @@
 
 #define _TUNE_PARAMETERS_ 1
 
-namespace rotors_control {
+namespace rotors_control
+{
 
-LeePositionControllerNode::LeePositionControllerNode(
-  const ros::NodeHandle& nh, const ros::NodeHandle& private_nh)
-  :nh_(nh),
-   private_nh_(private_nh){
-  InitializeParams();
+  LeePositionControllerNode::LeePositionControllerNode(
+      const ros::NodeHandle &nh, const ros::NodeHandle &private_nh)
+      : nh_(nh),
+        private_nh_(private_nh)
+  {
+    InitializeParams();
 
-  cmd_pose_sub_ = nh_.subscribe(
-      mav_msgs::default_topics::COMMAND_POSE, 1,
-      &LeePositionControllerNode::CommandPoseCallback, this);
+    cmd_pose_sub_ = nh_.subscribe(
+        mav_msgs::default_topics::COMMAND_POSE, 1,
+        &LeePositionControllerNode::CommandPoseCallback, this);
 
-  cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
-      mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
-      &LeePositionControllerNode::MultiDofJointTrajectoryCallback, this);
+    cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
+        mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
+        &LeePositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
-  odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
-                               &LeePositionControllerNode::OdometryCallback, this);
+    odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
+                                  &LeePositionControllerNode::OdometryCallback, this);
 
 #if (_DEBUG_TORQUE_THRUST_)
-  torque_thrust_reference_pub_ = nh_.advertise<mav_msgs::TorqueThrust>(
-      kDefaultCommandTorqueThrustTopic, 1);
+    torque_thrust_reference_pub_ = nh_.advertise<mav_msgs::TorqueThrust>(
+        kDefaultCommandTorqueThrustTopic, 1);
 #endif
 
-  motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(
-      mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
+    motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(
+        mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
-  command_timer_ = nh_.createTimer(ros::Duration(0), &LeePositionControllerNode::TimedCommandCallback, this,
-                                  true, false);
-}
-
-LeePositionControllerNode::~LeePositionControllerNode() { }
-
-void LeePositionControllerNode::InitializeParams() {
-
-  // Read parameters from rosparam.
-  GetRosParameter(private_nh_, "position_gain/x",
-                  lee_position_controller_.controller_parameters_.position_gain_.x(),
-                  &lee_position_controller_.controller_parameters_.position_gain_.x());
-  GetRosParameter(private_nh_, "position_gain/y",
-                  lee_position_controller_.controller_parameters_.position_gain_.y(),
-                  &lee_position_controller_.controller_parameters_.position_gain_.y());
-  GetRosParameter(private_nh_, "position_gain/z",
-                  lee_position_controller_.controller_parameters_.position_gain_.z(),
-                  &lee_position_controller_.controller_parameters_.position_gain_.z());
-  GetRosParameter(private_nh_, "velocity_gain/x",
-                  lee_position_controller_.controller_parameters_.velocity_gain_.x(),
-                  &lee_position_controller_.controller_parameters_.velocity_gain_.x());
-  GetRosParameter(private_nh_, "velocity_gain/y",
-                  lee_position_controller_.controller_parameters_.velocity_gain_.y(),
-                  &lee_position_controller_.controller_parameters_.velocity_gain_.y());
-  GetRosParameter(private_nh_, "velocity_gain/z",
-                  lee_position_controller_.controller_parameters_.velocity_gain_.z(),
-                  &lee_position_controller_.controller_parameters_.velocity_gain_.z());
-  GetRosParameter(private_nh_, "attitude_gain/x",
-                  lee_position_controller_.controller_parameters_.attitude_gain_.x(),
-                  &lee_position_controller_.controller_parameters_.attitude_gain_.x());
-  GetRosParameter(private_nh_, "attitude_gain/y",
-                  lee_position_controller_.controller_parameters_.attitude_gain_.y(),
-                  &lee_position_controller_.controller_parameters_.attitude_gain_.y());
-  GetRosParameter(private_nh_, "attitude_gain/z",
-                  lee_position_controller_.controller_parameters_.attitude_gain_.z(),
-                  &lee_position_controller_.controller_parameters_.attitude_gain_.z());
-  GetRosParameter(private_nh_, "angular_rate_gain/x",
-                  lee_position_controller_.controller_parameters_.angular_rate_gain_.x(),
-                  &lee_position_controller_.controller_parameters_.angular_rate_gain_.x());
-  GetRosParameter(private_nh_, "angular_rate_gain/y",
-                  lee_position_controller_.controller_parameters_.angular_rate_gain_.y(),
-                  &lee_position_controller_.controller_parameters_.angular_rate_gain_.y());
-  GetRosParameter(private_nh_, "angular_rate_gain/z",
-                  lee_position_controller_.controller_parameters_.angular_rate_gain_.z(),
-                  &lee_position_controller_.controller_parameters_.angular_rate_gain_.z());
-  GetVehicleParameters(private_nh_, &lee_position_controller_.vehicle_parameters_);
-  lee_position_controller_.InitializeParameters();
-}
-void LeePositionControllerNode::Publish() {
-}
-
-void LeePositionControllerNode::CommandPoseCallback(
-    const geometry_msgs::PoseStampedConstPtr& pose_msg) {
-  // Clear all pending commands.
-  command_timer_.stop();
-  commands_.clear();
-  command_waiting_times_.clear();
-
-  mav_msgs::EigenTrajectoryPoint eigen_reference;
-  mav_msgs::eigenTrajectoryPointFromPoseMsg(*pose_msg, &eigen_reference);
-  commands_.push_front(eigen_reference);
-
-  lee_position_controller_.SetTrajectoryPoint(commands_.front());
-  commands_.pop_front();
-}
-
-void LeePositionControllerNode::MultiDofJointTrajectoryCallback(
-    const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
-  // Clear all pending commands.
-  command_timer_.stop();
-  commands_.clear();
-  command_waiting_times_.clear();
-
-  const size_t n_commands = msg->points.size();
-
-  if(n_commands < 1){
-    ROS_WARN_STREAM("Got MultiDOFJointTrajectory message, but message has no points.");
-    return;
+    command_timer_ = nh_.createTimer(ros::Duration(0), &LeePositionControllerNode::TimedCommandCallback, this,
+                                     true, false);
   }
 
-  mav_msgs::EigenTrajectoryPoint eigen_reference;
-  mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
-  commands_.push_front(eigen_reference);
+  LeePositionControllerNode::~LeePositionControllerNode() {}
 
-  for (size_t i = 1; i < n_commands; ++i) {
-    const trajectory_msgs::MultiDOFJointTrajectoryPoint& reference_before = msg->points[i-1];
-    const trajectory_msgs::MultiDOFJointTrajectoryPoint& current_reference = msg->points[i];
+  void LeePositionControllerNode::InitializeParams()
+  {
 
-    mav_msgs::eigenTrajectoryPointFromMsg(current_reference, &eigen_reference);
-
-    commands_.push_back(eigen_reference);
-    command_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
+    // Read parameters from rosparam.
+    GetRosParameter(private_nh_, "position_gain/x",
+                    lee_position_controller_.controller_parameters_.position_gain_.x(),
+                    &lee_position_controller_.controller_parameters_.position_gain_.x());
+    GetRosParameter(private_nh_, "position_gain/y",
+                    lee_position_controller_.controller_parameters_.position_gain_.y(),
+                    &lee_position_controller_.controller_parameters_.position_gain_.y());
+    GetRosParameter(private_nh_, "position_gain/z",
+                    lee_position_controller_.controller_parameters_.position_gain_.z(),
+                    &lee_position_controller_.controller_parameters_.position_gain_.z());
+    GetRosParameter(private_nh_, "velocity_gain/x",
+                    lee_position_controller_.controller_parameters_.velocity_gain_.x(),
+                    &lee_position_controller_.controller_parameters_.velocity_gain_.x());
+    GetRosParameter(private_nh_, "velocity_gain/y",
+                    lee_position_controller_.controller_parameters_.velocity_gain_.y(),
+                    &lee_position_controller_.controller_parameters_.velocity_gain_.y());
+    GetRosParameter(private_nh_, "velocity_gain/z",
+                    lee_position_controller_.controller_parameters_.velocity_gain_.z(),
+                    &lee_position_controller_.controller_parameters_.velocity_gain_.z());
+    GetRosParameter(private_nh_, "attitude_gain/x",
+                    lee_position_controller_.controller_parameters_.attitude_gain_.x(),
+                    &lee_position_controller_.controller_parameters_.attitude_gain_.x());
+    GetRosParameter(private_nh_, "attitude_gain/y",
+                    lee_position_controller_.controller_parameters_.attitude_gain_.y(),
+                    &lee_position_controller_.controller_parameters_.attitude_gain_.y());
+    GetRosParameter(private_nh_, "attitude_gain/z",
+                    lee_position_controller_.controller_parameters_.attitude_gain_.z(),
+                    &lee_position_controller_.controller_parameters_.attitude_gain_.z());
+    GetRosParameter(private_nh_, "angular_rate_gain/x",
+                    lee_position_controller_.controller_parameters_.angular_rate_gain_.x(),
+                    &lee_position_controller_.controller_parameters_.angular_rate_gain_.x());
+    GetRosParameter(private_nh_, "angular_rate_gain/y",
+                    lee_position_controller_.controller_parameters_.angular_rate_gain_.y(),
+                    &lee_position_controller_.controller_parameters_.angular_rate_gain_.y());
+    GetRosParameter(private_nh_, "angular_rate_gain/z",
+                    lee_position_controller_.controller_parameters_.angular_rate_gain_.z(),
+                    &lee_position_controller_.controller_parameters_.angular_rate_gain_.z());
+    GetVehicleParameters(private_nh_, &lee_position_controller_.vehicle_parameters_);
+    lee_position_controller_.InitializeParameters();
+  }
+  void LeePositionControllerNode::Publish()
+  {
   }
 
-  // We can trigger the first command immediately.
-  lee_position_controller_.SetTrajectoryPoint(commands_.front());
-  commands_.pop_front();
+  void LeePositionControllerNode::CommandPoseCallback(
+      const geometry_msgs::PoseStampedConstPtr &pose_msg)
+  {
+    // Clear all pending commands.
+    command_timer_.stop();
+    commands_.clear();
+    command_waiting_times_.clear();
 
-  if (n_commands > 1) {
-    command_timer_.setPeriod(command_waiting_times_.front());
-    command_waiting_times_.pop_front();
-    command_timer_.start();
-  }
-}
+    mav_msgs::EigenTrajectoryPoint eigen_reference;
+    mav_msgs::eigenTrajectoryPointFromPoseMsg(*pose_msg, &eigen_reference);
+    commands_.push_front(eigen_reference);
 
-void LeePositionControllerNode::TimedCommandCallback(const ros::TimerEvent& e) {
-
-  if(commands_.empty()){
-    ROS_WARN("Commands empty, this should not happen here");
-    return;
+    lee_position_controller_.SetTrajectoryPoint(commands_.front());
+    commands_.pop_front();
   }
 
-  const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
-  lee_position_controller_.SetTrajectoryPoint(commands_.front());
-  commands_.pop_front();
-  command_timer_.stop();
-  if(!command_waiting_times_.empty()){
-    command_timer_.setPeriod(command_waiting_times_.front());
-    command_waiting_times_.pop_front();
-    command_timer_.start();
+  void LeePositionControllerNode::MultiDofJointTrajectoryCallback(
+      const trajectory_msgs::MultiDOFJointTrajectoryConstPtr &msg)
+  {
+    // Clear all pending commands.
+    command_timer_.stop();
+    commands_.clear();
+    command_waiting_times_.clear();
+
+    const size_t n_commands = msg->points.size();
+
+    if (n_commands < 1)
+    {
+      ROS_WARN_STREAM("Got MultiDOFJointTrajectory message, but message has no points.");
+      return;
+    }
+
+    mav_msgs::EigenTrajectoryPoint eigen_reference;
+    mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
+    commands_.push_front(eigen_reference);
+
+    for (size_t i = 1; i < n_commands; ++i)
+    {
+      const trajectory_msgs::MultiDOFJointTrajectoryPoint &reference_before = msg->points[i - 1];
+      const trajectory_msgs::MultiDOFJointTrajectoryPoint &current_reference = msg->points[i];
+
+      mav_msgs::eigenTrajectoryPointFromMsg(current_reference, &eigen_reference);
+
+      commands_.push_back(eigen_reference);
+      command_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
+    }
+
+    // We can trigger the first command immediately.
+    lee_position_controller_.SetTrajectoryPoint(commands_.front());
+    commands_.pop_front();
+
+    if (n_commands > 1)
+    {
+      command_timer_.setPeriod(command_waiting_times_.front());
+      command_waiting_times_.pop_front();
+      command_timer_.start();
+    }
   }
-}
 
-void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
+  void LeePositionControllerNode::TimedCommandCallback(const ros::TimerEvent &e)
+  {
 
-  ROS_INFO_ONCE("LeePositionController got first odometry message.");
+    if (commands_.empty())
+    {
+      ROS_WARN("Commands empty, this should not happen here");
+      return;
+    }
 
-  EigenOdometry odometry;
-  eigenOdometryFromMsg(odometry_msg, &odometry);
-  lee_position_controller_.SetOdometry(odometry);
+    const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
+    lee_position_controller_.SetTrajectoryPoint(commands_.front());
+    commands_.pop_front();
+    command_timer_.stop();
+    if (!command_waiting_times_.empty())
+    {
+      command_timer_.setPeriod(command_waiting_times_.front());
+      command_waiting_times_.pop_front();
+      command_timer_.start();
+    }
+  }
 
+  void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg)
+  {
+
+    ROS_INFO_ONCE("LeePositionController got first odometry message.");
+
+    EigenOdometry odometry;
+    eigenOdometryFromMsg(odometry_msg, &odometry);
+    lee_position_controller_.SetOdometry(odometry);
 
 #if (_TUNE_PARAMETERS_)
-  lee_position_controller_.InitializeParameters();
+    lee_position_controller_.InitializeParameters();
 #endif
 
 #if (_DEBUG_TORQUE_THRUST_)
-  Eigen::Vector4d ref_torque_thrust;
-  lee_position_controller_.CalculateTorqueThrust(&ref_torque_thrust);
+    Eigen::Vector4d ref_torque_thrust;
+    lee_position_controller_.CalculateTorqueThrust(&ref_torque_thrust);
 
-  //torque_thrust_msg is in FLU frame
-  mav_msgs::TorqueThrustPtr torque_thrust_msg(new mav_msgs::TorqueThrust);
+    // torque_thrust_msg is in FLU frame
+    mav_msgs::TorqueThrustPtr torque_thrust_msg(new mav_msgs::TorqueThrust);
 
-  torque_thrust_msg->torque.x=ref_torque_thrust(0);
-  torque_thrust_msg->torque.y=ref_torque_thrust(1);
-  torque_thrust_msg->torque.z=ref_torque_thrust(2);
-  torque_thrust_msg->thrust.x=0;
-  torque_thrust_msg->thrust.y=0;
-  torque_thrust_msg->thrust.z=ref_torque_thrust(3);
-  torque_thrust_msg->header.stamp = odometry_msg->header.stamp;
+    torque_thrust_msg->torque.x = ref_torque_thrust(0);
+    torque_thrust_msg->torque.y = ref_torque_thrust(1);
+    torque_thrust_msg->torque.z = ref_torque_thrust(2);
+    torque_thrust_msg->thrust.x = 0;
+    torque_thrust_msg->thrust.y = 0;
+    torque_thrust_msg->thrust.z = ref_torque_thrust(3);
+    torque_thrust_msg->header.stamp = odometry_msg->header.stamp;
 
-  torque_thrust_reference_pub_.publish(torque_thrust_msg);
-#endif 
-#if (!_DEBUG_TORQUE_THRUST_)
-  Eigen::VectorXd ref_rotor_velocities;
-  lee_position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
-
-  // Todo(ffurrer): Do this in the conversions header.
-  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
-
-  actuator_msg->angular_velocities.clear();
-  for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-  actuator_msg->header.stamp = odometry_msg->header.stamp;
-
-  motor_velocity_reference_pub_.publish(actuator_msg);
+    torque_thrust_reference_pub_.publish(torque_thrust_msg);
 #endif
+#if (!_DEBUG_TORQUE_THRUST_)
+    Eigen::VectorXd ref_rotor_velocities;
+    lee_position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
+
+    // Todo(ffurrer): Do this in the conversions header.
+    mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
+
+    actuator_msg->angular_velocities.clear();
+    for (int i = 0; i < ref_rotor_velocities.size(); i++)
+      actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+    actuator_msg->header.stamp = odometry_msg->header.stamp;
+
+    motor_velocity_reference_pub_.publish(actuator_msg);
+#endif
+  }
 
 }
 
-}
-
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "lee_position_controller_node");
 
   ros::NodeHandle nh;
