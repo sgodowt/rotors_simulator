@@ -201,7 +201,7 @@ namespace rotors_control
     lee_position_controller_.SetOdometry(odometry);
 
 #if (_TUNE_PARAMETERS_)
-    lee_position_controller_.InitializeParameters();
+    InitializeParams();
 #endif
 
 #if (_DEBUG_TORQUE_THRUST_)
