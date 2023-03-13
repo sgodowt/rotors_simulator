@@ -32,7 +32,7 @@
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-double x = 0, y = 0, z = 1, yaw = 0;
+double x = 0, y = 0, z = 2, yaw = 0;
 double vx = 0, vy = 0, vz = 0, yawrate = 0;
 
 void zCallback(const std_msgs::Float64::ConstPtr &msg)
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
   trajectory_msg.header.stamp = ros::Time::now();
 
   // Default desired position and yaw.
-  Eigen::Vector3d desired_position(0.0, 0.0, 1.0);
+  Eigen::Vector3d desired_position(0.0, 0.0, 2.0);
   double desired_yaw = 0.0;
 
   // Overwrite defaults if set as node parameters.

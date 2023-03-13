@@ -44,6 +44,8 @@ namespace rotors_control
       mav_msgs::default_topics::COMMAND_TRAJECTORY; // "command/trajectory"
   static const std::string kDefaultCommandRollPitchYawrateThrustTopic =
       mav_msgs::default_topics::COMMAND_ROLL_PITCH_YAWRATE_THRUST;
+  static const std::string kDefaultCommandAttitudeThrustTopic =
+      mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST;
   // "command/roll_pitch_yawrate_thrust"
   static const std::string kDefaultImuTopic =
       mav_msgs::default_topics::IMU; // "imu

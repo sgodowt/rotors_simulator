@@ -1,6 +1,6 @@
 <launch>
   <arg name="mav_name" default="yigle"/>
-  <arg name="world_name" default="experiment"/>
+  <arg name="world_name" default="empty"/>
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
   <arg name="log_file" default="$(arg mav_name)" />
@@ -29,13 +29,35 @@
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)"/>
-      <arg name="z" value="1.1"/>
+      <arg name="z" value="2.0"/>
     </include>
-    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+
+    <!-- <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
       <rosparam command="load" file="$(find aerial_ego_simulation)/config/lee_controller_$(arg mav_name).yaml" />
       <rosparam command="load" file="$(find aerial_ego_simulation)/config/$(arg mav_name).yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node> -->
+
+    <node name="position_controller_node" pkg="rotors_control" type="position_controller_node" output="screen">
+      <rosparam command="load" file="$(find aerial_ego_simulation)/config/position_controller_$(arg mav_name).yaml" />
+      <rosparam command="load" file="$(find aerial_ego_simulation)/config/$(arg mav_name).yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
+    <node name="attitude_thrust_controller_node" pkg="rotors_control" type="attitude_thrust_controller_node" output="screen">
+      <rosparam command="load" file="$(find aerial_ego_simulation)/config/attitude_thrust_controller_$(arg mav_name).yaml" />
+      <rosparam command="load" file="$(find aerial_ego_simulation)/config/$(arg mav_name).yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <!-- <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
+      <rosparam command="load" file="$(find aerial_ego_simulation)/config/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
+      <rosparam command="load" file="$(find aerial_ego_simulation)/config/$(arg mav_name).yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node> -->
+
+    <!-- <node name="key_joystick" pkg="rotors_joy_interface" type="key_joystick.py" />
+    <node name="joy_node" pkg="joy" type="joy_node" />
+    <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" /> -->
+    
     <node name="bridge_yigle_rotorS" pkg="aerial_ego_simulation" type="bridge_yigle_rotorS" output="screen"/>
     <node name="hovering_test" pkg="rotors_gazebo" type="hovering_test" output="screen"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />

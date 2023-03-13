@@ -20,52 +20,68 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H
-#define ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H
+#ifndef ROTORS_CONTROL_POSITION_CONTROLLER_NODE_H
+#define ROTORS_CONTROL_POSITION_CONTROLLER_NODE_H
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
 #include <stdio.h>
 
 #include <geometry_msgs/PoseStamped.h>
-#include <mav_msgs/RollPitchYawrateThrust.h>
 #include <mav_msgs/Actuators.h>
+#include <mav_msgs/AttitudeThrust.h>
+#include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
-#include <ros/ros.h>
 #include <ros/callback_queue.h>
+#include <ros/ros.h>
+#include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 #include "rotors_control/common.h"
-#include "rotors_control/roll_pitch_yawrate_thrust_controller.h"
+#include "rotors_control/position_controller.h"
 
 namespace rotors_control
 {
 
-  class RollPitchYawrateThrustControllerNode
+  class PositionControllerNode
   {
   public:
-    RollPitchYawrateThrustControllerNode();
-    ~RollPitchYawrateThrustControllerNode();
+    PositionControllerNode(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh);
+    ~PositionControllerNode();
 
     void InitializeParams();
+    void Publish();
 
   private:
-    RollPitchYawrateThrustController roll_pitch_yawrate_thrust_controller_;
+    ros::NodeHandle nh_;
+    ros::NodeHandle private_nh_;
+
+    PositionController position_controller_;
 
     std::string namespace_;
 
     // subscribers
-    ros::Subscriber cmd_roll_pitch_yawrate_thrust_sub_;
+    ros::Subscriber cmd_trajectory_sub_;
+    ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
+    ros::Subscriber cmd_pose_sub_;
     ros::Subscriber odometry_sub_;
-#if (_DEBUG_TORQUE_THRUST_)
-    ros::Publisher torque_thrust_reference_pub_;
-#endif
-    ros::Publisher motor_velocity_reference_pub_;
 
-    void RollPitchYawrateThrustCallback(
-        const mav_msgs::RollPitchYawrateThrustConstPtr &roll_pitch_yawrate_thrust_reference_msg);
+    ros::Publisher attitude_thrust_reference_pub_;
+
+
+    mav_msgs::EigenTrajectoryPointDeque commands_;
+    std::deque<ros::Duration> command_waiting_times_;
+    ros::Timer command_timer_;
+
+    void TimedCommandCallback(const ros::TimerEvent &e);
+
+    void MultiDofJointTrajectoryCallback(
+        const trajectory_msgs::MultiDOFJointTrajectoryConstPtr &trajectory_reference_msg);
+
+    void CommandPoseCallback(
+        const geometry_msgs::PoseStampedConstPtr &pose_msg);
 
     void OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg);
   };
 }
 
-#endif // ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H
+#endif // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H

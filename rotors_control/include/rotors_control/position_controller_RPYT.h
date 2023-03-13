@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
-#define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
+#ifndef ROTORS_CONTROL_POSITION_CONTROLLER_H
+#define ROTORS_CONTROL_POSITION_CONTROLLER_H
 
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
@@ -38,11 +38,11 @@ namespace rotors_control
   static const Eigen::Vector3d kDefaultAttitudeGain = Eigen::Vector3d(3, 3, 0.035);
   static const Eigen::Vector3d kDefaultAngularRateGain = Eigen::Vector3d(0.52, 0.52, 0.025);
 
-  class LeePositionControllerParameters
+  class PositionControllerParameters
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    LeePositionControllerParameters()
+    PositionControllerParameters()
         : position_gain_(kDefaultPositionGain),
           velocity_gain_(kDefaultVelocityGain),
           attitude_gain_(kDefaultAttitudeGain),
@@ -59,22 +59,23 @@ namespace rotors_control
     RotorConfiguration rotor_configuration_;
   };
 
-  class LeePositionController
+  class PositionController
   {
   public:
-    LeePositionController();
-    ~LeePositionController();
+    PositionController();
+    ~PositionController();
     void InitializeParameters();
     void CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const;
 
 #if (_DEBUG_TORQUE_THRUST_)
-    void CalculateTorqueThrust(Eigen::Vector4d *torque_thrust) const;
+    void CalculateAttiThrust(mav_msgs::AttitudeThrust *atti_thrust) const;
+    void ComputeDesiredAttitude(const Eigen::Vector3d &acceleration, Eigen::Quaterniond *desired_attitude) const;
 #endif
     void SetOdometry(const EigenOdometry &odometry);
     void SetTrajectoryPoint(
         const mav_msgs::EigenTrajectoryPoint &command_trajectory);
 
-    LeePositionControllerParameters controller_parameters_;
+    PositionControllerParameters controller_parameters_;
     VehicleParameters vehicle_parameters_;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -89,9 +90,6 @@ namespace rotors_control
     mav_msgs::EigenTrajectoryPoint command_trajectory_;
     EigenOdometry odometry_;
 
-#if (_DEBUG_TORQUE_THRUST_)
-    void ComputeDesiredTorque(const Eigen::Vector3d &angle, Eigen::Vector3d *desired_torque) const;
-#endif
 
     void ComputeDesiredAngularAcc(const Eigen::Vector3d &acceleration,
                                   Eigen::Vector3d *angular_acceleration) const;

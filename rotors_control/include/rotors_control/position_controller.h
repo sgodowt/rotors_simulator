@@ -68,7 +68,7 @@ namespace rotors_control
     void CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const;
 
 #if (_DEBUG_TORQUE_THRUST_)
-    void CalculateRPYThrust(mav_msgs::EigenRollPitchYawrateThrust *rpy_thrust) const;
+    void CalculateRPYThrust(mav_msgs::RollPitchYawrateThrust *rpy_thrust) const;
 #endif
     void SetOdometry(const EigenOdometry &odometry);
     void SetTrajectoryPoint(

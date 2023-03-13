@@ -35,7 +35,7 @@ namespace rotors_control
 
     cmd_roll_pitch_yawrate_thrust_sub_ = nh.subscribe(kDefaultCommandRollPitchYawrateThrustTopic, 1,
                                                       &RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback, this);
-    odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 1,
+    odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
                                  &RollPitchYawrateThrustControllerNode::OdometryCallback, this);
 #if (_DEBUG_TORQUE_THRUST_)
     torque_thrust_reference_pub_ = nh.advertise<mav_msgs::TorqueThrust>(
@@ -74,9 +74,6 @@ namespace rotors_control
     GetVehicleParameters(pnh, &roll_pitch_yawrate_thrust_controller_.vehicle_parameters_);
     roll_pitch_yawrate_thrust_controller_.InitializeParameters();
   }
-  void RollPitchYawrateThrustControllerNode::Publish()
-  {
-  }
 
   void RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback(
       const mav_msgs::RollPitchYawrateThrustConstPtr &roll_pitch_yawrate_thrust_reference_msg)
@@ -91,6 +88,7 @@ namespace rotors_control
 
     ROS_INFO_ONCE("RollPitchYawrateThrustController got first odometry message.");
 
+
     EigenOdometry odometry;
     eigenOdometryFromMsg(odometry_msg, &odometry);
     roll_pitch_yawrate_thrust_controller_.SetOdometry(odometry);
@@ -99,7 +97,7 @@ namespace rotors_control
     Eigen::Vector4d ref_torque_thrust;
     roll_pitch_yawrate_thrust_controller_.CalculateTorqueThrust(&ref_torque_thrust);
 
-    // torque_thrust_msg is in FLU frame
+    // IMPORTANT!!: torque_thrust_msg is in FLU frame
     mav_msgs::TorqueThrustPtr torque_thrust_msg(new mav_msgs::TorqueThrust);
 
     torque_thrust_msg->torque.x = ref_torque_thrust(0);
@@ -109,7 +107,7 @@ namespace rotors_control
     torque_thrust_msg->thrust.y = 0;
     torque_thrust_msg->thrust.z = ref_torque_thrust(3);
     torque_thrust_msg->header.stamp = odometry_msg->header.stamp;
-
+    
     torque_thrust_reference_pub_.publish(torque_thrust_msg);
 #endif
 

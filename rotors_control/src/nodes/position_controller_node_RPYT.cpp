@@ -49,9 +49,9 @@ namespace rotors_control
 
     odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
                                   &PositionControllerNode::OdometryCallback, this);
-    
-    RPY_thrust_reference_pub_ = nh_.advertise<mav_msgs::RollPitchYawrateThrust>(
-        kDefaultCommandRollPitchYawrateThrustTopic, 1);
+
+    attitude_thrust_reference_pub_ = nh_.advertise<mav_msgs::AttitudeThrust>(
+        kDefaultCommandAttitudeThrustTopic, 1);
 
     command_timer_ = nh_.createTimer(ros::Duration(0), &PositionControllerNode::TimedCommandCallback, this,
                                      true, false);
@@ -172,7 +172,7 @@ namespace rotors_control
   {
 
     ROS_INFO_ONCE("PositionController got first odometry message.");
-
+    
     EigenOdometry odometry;
     eigenOdometryFromMsg(odometry_msg, &odometry);
     position_controller_.SetOdometry(odometry);
@@ -180,14 +180,13 @@ namespace rotors_control
 #if (_TUNE_PARAMETERS_)
     InitializeParams();
 #endif
+    mav_msgs::AttitudeThrust ref_atti_thrust;
 
-    mav_msgs::RollPitchYawrateThrust ref_RPY_thrust;
-
-    position_controller_.CalculateRPYThrust(&ref_RPY_thrust);
-
-    // msg is in FLU frame
-
-    RPY_thrust_reference_pub_.publish(ref_RPY_thrust);
+    //ref_atti_thrust is in FLU coordinate!!
+    position_controller_.CalculateAttiThrust(&ref_atti_thrust);
+    ref_atti_thrust.header.stamp = odometry_msg->header.stamp;
+    
+    attitude_thrust_reference_pub_.publish(ref_atti_thrust);
 
   }
 

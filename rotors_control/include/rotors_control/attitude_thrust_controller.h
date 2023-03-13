@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
-#define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
+#ifndef ROTORS_CONTROL_ATTITUDE_THRUST_CONTROLLER_H
+#define ROTORS_CONTROL_ATTITUDE_THRUST_CONTROLLER_H
 
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
@@ -32,49 +32,44 @@
 namespace rotors_control
 {
 
-  // Default values for the lee position controller and the Asctec Firefly.
-  static const Eigen::Vector3d kDefaultPositionGain = Eigen::Vector3d(6, 6, 6);
-  static const Eigen::Vector3d kDefaultVelocityGain = Eigen::Vector3d(4.7, 4.7, 4.7);
+  // Default values for the roll pitch yawrate thrust controller and the Asctec Firefly.
   static const Eigen::Vector3d kDefaultAttitudeGain = Eigen::Vector3d(3, 3, 0.035);
   static const Eigen::Vector3d kDefaultAngularRateGain = Eigen::Vector3d(0.52, 0.52, 0.025);
 
-  class LeePositionControllerParameters
+  class AttitudeThrustControllerParameters
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    LeePositionControllerParameters()
-        : position_gain_(kDefaultPositionGain),
-          velocity_gain_(kDefaultVelocityGain),
-          attitude_gain_(kDefaultAttitudeGain),
+    AttitudeThrustControllerParameters()
+        : attitude_gain_(kDefaultAttitudeGain),
           angular_rate_gain_(kDefaultAngularRateGain)
     {
       calculateAllocationMatrix(rotor_configuration_, &allocation_matrix_);
     }
 
     Eigen::Matrix4Xd allocation_matrix_;
-    Eigen::Vector3d position_gain_;
-    Eigen::Vector3d velocity_gain_;
     Eigen::Vector3d attitude_gain_;
     Eigen::Vector3d angular_rate_gain_;
     RotorConfiguration rotor_configuration_;
   };
 
-  class LeePositionController
+  class AttitudeThrustController
   {
   public:
-    LeePositionController();
-    ~LeePositionController();
+    AttitudeThrustController();
+    ~AttitudeThrustController();
     void InitializeParameters();
     void CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const;
 
 #if (_DEBUG_TORQUE_THRUST_)
     void CalculateTorqueThrust(Eigen::Vector4d *torque_thrust) const;
 #endif
-    void SetOdometry(const EigenOdometry &odometry);
-    void SetTrajectoryPoint(
-        const mav_msgs::EigenTrajectoryPoint &command_trajectory);
 
-    LeePositionControllerParameters controller_parameters_;
+    void SetOdometry(const EigenOdometry &odometry);
+    void SetAttitudeThrust(
+        const mav_msgs::EigenAttitudeThrust &attitude_thrust);
+
+    AttitudeThrustControllerParameters controller_parameters_;
     VehicleParameters vehicle_parameters_;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -86,17 +81,14 @@ namespace rotors_control
     Eigen::Vector3d normalized_angular_rate_gain_;
     Eigen::MatrixX4d angular_acc_to_rotor_velocities_;
 
-    mav_msgs::EigenTrajectoryPoint command_trajectory_;
+    mav_msgs::EigenAttitudeThrust attitude_thrust_;
     EigenOdometry odometry_;
 
+    void ComputeDesiredAngularAcc(Eigen::Vector3d *angular_acceleration) const;
 #if (_DEBUG_TORQUE_THRUST_)
-    void ComputeDesiredTorque(const Eigen::Vector3d &angle, Eigen::Vector3d *desired_torque) const;
+    void ComputeDesiredTorque(Eigen::Vector3d *desired_torque) const;
 #endif
-
-    void ComputeDesiredAngularAcc(const Eigen::Vector3d &acceleration,
-                                  Eigen::Vector3d *angular_acceleration) const;
-    void ComputeDesiredAcceleration(Eigen::Vector3d *acceleration) const;
   };
 }
 
-#endif // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
+#endif 

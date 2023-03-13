@@ -149,7 +149,7 @@ namespace rotors_control
     Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
     angular_rate_des[2] = command_trajectory_.getYawRate();
 
-    Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
+    Eigen::Vector3d angular_rate_error = odometry_.angular_velocity -R.transpose() * R_des* angular_rate_des;
 
     *angular_acceleration = -1 * angle_error.cwiseProduct(normalized_attitude_gain_) - angular_rate_error.cwiseProduct(normalized_angular_rate_gain_) + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
   }
@@ -212,7 +212,7 @@ namespace rotors_control
     Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
     angular_rate_des[2] = command_trajectory_.getYawRate();
 
-    Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
+    Eigen::Vector3d angular_rate_error = odometry_.angular_velocity -R.transpose() * R_des* angular_rate_des;
 
     *desired_torque = -1 * angle_error.cwiseProduct(controller_parameters_.attitude_gain_) - angular_rate_error.cwiseProduct(controller_parameters_.angular_rate_gain_) + odometry_.angular_velocity.cross(vehicle_parameters_.inertia_ * odometry_.angular_velocity); // we don't need the inertia matrix here
   }
