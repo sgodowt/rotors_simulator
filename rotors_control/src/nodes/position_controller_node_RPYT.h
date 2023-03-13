@@ -37,16 +37,16 @@
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 #include "rotors_control/common.h"
-#include "rotors_control/position_controller.h"
+#include "rotors_control/position_controller_RPYT.h"
 
 namespace rotors_control
 {
 
-  class PositionControllerNode
+  class PositionControllerRPYTNode
   {
   public:
-    PositionControllerNode(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh);
-    ~PositionControllerNode();
+    PositionControllerRPYTNode(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh);
+    ~PositionControllerRPYTNode();
 
     void InitializeParams();
     void Publish();
@@ -55,7 +55,7 @@ namespace rotors_control
     ros::NodeHandle nh_;
     ros::NodeHandle private_nh_;
 
-    PositionController position_controller_;
+    PositionControllerRPYT position_controller_;
 
     std::string namespace_;
 

@@ -38,11 +38,11 @@ namespace rotors_control
   static const Eigen::Vector3d kDefaultAttitudeGain = Eigen::Vector3d(3, 3, 0.035);
   static const Eigen::Vector3d kDefaultAngularRateGain = Eigen::Vector3d(0.52, 0.52, 0.025);
 
-  class PositionControllerParameters
+  class PositionControllerRPYTParameters
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    PositionControllerParameters()
+    PositionControllerRPYTParameters()
         : position_gain_(kDefaultPositionGain),
           velocity_gain_(kDefaultVelocityGain),
           attitude_gain_(kDefaultAttitudeGain),
@@ -59,11 +59,11 @@ namespace rotors_control
     RotorConfiguration rotor_configuration_;
   };
 
-  class PositionController
+  class PositionControllerRPYT
   {
   public:
-    PositionController();
-    ~PositionController();
+    PositionControllerRPYT();
+    ~PositionControllerRPYT();
     void InitializeParameters();
     void CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const;
 
@@ -75,7 +75,7 @@ namespace rotors_control
     void SetTrajectoryPoint(
         const mav_msgs::EigenTrajectoryPoint &command_trajectory);
 
-    PositionControllerParameters controller_parameters_;
+    PositionControllerRPYTParameters controller_parameters_;
     VehicleParameters vehicle_parameters_;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

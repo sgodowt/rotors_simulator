@@ -39,6 +39,10 @@ add_library(roll_pitch_yawrate_thrust_controller
   src/library/roll_pitch_yawrate_thrust_controller.cpp
 )
 
+add_library(position_controller_RPYT
+  src/library/position_controller_RPYT.cpp
+)
+
 add_library(attitude_thrust_controller
   src/library/attitude_thrust_controller.cpp
 )
@@ -51,6 +55,9 @@ add_dependencies(position_controller ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
 add_dependencies(roll_pitch_yawrate_thrust_controller ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(position_controller_RPYT ${catkin_LIBRARIES})
+add_dependencies(position_controller_RPYT ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(attitude_thrust_controller ${catkin_LIBRARIES})
 add_dependencies(attitude_thrust_controller ${catkin_EXPORTED_TARGETS})
@@ -70,6 +77,11 @@ add_executable(roll_pitch_yawrate_thrust_controller_node
 add_dependencies(roll_pitch_yawrate_thrust_controller_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(roll_pitch_yawrate_thrust_controller_node
   roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
+
+  add_executable(position_controller_node_RPYT src/nodes/position_controller_node_RPYT.cpp)
+  add_dependencies(position_controller_node_RPYT ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(position_controller_node_RPYT
+    position_controller_RPYT ${catkin_LIBRARIES})
 
   add_executable(attitude_thrust_controller_node
   src/nodes/attitude_thrust_controller_node.cpp)

@@ -38,7 +38,7 @@
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node> -->
 
-    <node name="position_controller_node" pkg="rotors_control" type="position_controller_node" output="screen">
+    <node name="position_controller_node_RPYT" pkg="rotors_control" type="position_controller_node_RPYT" output="screen">
       <rosparam command="load" file="$(find aerial_ego_simulation)/config/position_controller_$(arg mav_name).yaml" />
       <rosparam command="load" file="$(find aerial_ego_simulation)/config/$(arg mav_name).yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />

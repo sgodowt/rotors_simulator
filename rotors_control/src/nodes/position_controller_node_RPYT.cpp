@@ -23,7 +23,7 @@
 #include <ros/ros.h>
 #include <mav_msgs/default_topics.h>
 
-#include "position_controller_node.h"
+#include "position_controller_node_RPYT.h"
 
 #include "rotors_control/parameters_ros.h"
 
@@ -32,7 +32,7 @@
 namespace rotors_control
 {
 
-  PositionControllerNode::PositionControllerNode(
+  PositionControllerRPYTNode::PositionControllerRPYTNode(
       const ros::NodeHandle &nh, const ros::NodeHandle &private_nh)
       : nh_(nh),
         private_nh_(private_nh)
@@ -41,25 +41,25 @@ namespace rotors_control
 
     cmd_pose_sub_ = nh_.subscribe(
         mav_msgs::default_topics::COMMAND_POSE, 1,
-        &PositionControllerNode::CommandPoseCallback, this);
+        &PositionControllerRPYTNode::CommandPoseCallback, this);
 
     cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
         mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
-        &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
+        &PositionControllerRPYTNode::MultiDofJointTrajectoryCallback, this);
 
     odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
-                                  &PositionControllerNode::OdometryCallback, this);
+                                  &PositionControllerRPYTNode::OdometryCallback, this);
 
     attitude_thrust_reference_pub_ = nh_.advertise<mav_msgs::AttitudeThrust>(
         kDefaultCommandAttitudeThrustTopic, 1);
 
-    command_timer_ = nh_.createTimer(ros::Duration(0), &PositionControllerNode::TimedCommandCallback, this,
+    command_timer_ = nh_.createTimer(ros::Duration(0), &PositionControllerRPYTNode::TimedCommandCallback, this,
                                      true, false);
   }
 
-  PositionControllerNode::~PositionControllerNode() {}
+  PositionControllerRPYTNode::~PositionControllerRPYTNode() {}
 
-  void PositionControllerNode::InitializeParams()
+  void PositionControllerRPYTNode::InitializeParams()
   {
 
     // Read parameters from rosparam.
@@ -84,11 +84,11 @@ namespace rotors_control
     GetVehicleParameters(private_nh_, &position_controller_.vehicle_parameters_);
     position_controller_.InitializeParameters();
   }
-  void PositionControllerNode::Publish()
+  void PositionControllerRPYTNode::Publish()
   {
   }
 
-  void PositionControllerNode::CommandPoseCallback(
+  void PositionControllerRPYTNode::CommandPoseCallback(
       const geometry_msgs::PoseStampedConstPtr &pose_msg)
   {
     // Clear all pending commands.
@@ -104,7 +104,7 @@ namespace rotors_control
     commands_.pop_front();
   }
 
-  void PositionControllerNode::MultiDofJointTrajectoryCallback(
+  void PositionControllerRPYTNode::MultiDofJointTrajectoryCallback(
       const trajectory_msgs::MultiDOFJointTrajectoryConstPtr &msg)
   {
     // Clear all pending commands.
@@ -147,7 +147,7 @@ namespace rotors_control
     }
   }
 
-  void PositionControllerNode::TimedCommandCallback(const ros::TimerEvent &e)
+  void PositionControllerRPYTNode::TimedCommandCallback(const ros::TimerEvent &e)
   {
 
     if (commands_.empty())
@@ -168,10 +168,10 @@ namespace rotors_control
     }
   }
 
-  void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg)
+  void PositionControllerRPYTNode::OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg)
   {
 
-    ROS_INFO_ONCE("PositionController got first odometry message.");
+    ROS_INFO_ONCE("PositionControllerRPYT got first odometry message.");
     
     EigenOdometry odometry;
     eigenOdometryFromMsg(odometry_msg, &odometry);
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
-  rotors_control::PositionControllerNode position_controller_node(nh, private_nh);
+  rotors_control::PositionControllerRPYTNode position_controller_node(nh, private_nh);
 
   ros::spin();
 

@@ -20,21 +20,21 @@
  * limitations under the License.
  */
 
-#include "rotors_control/position_controller.h"
+#include "rotors_control/position_controller_RPYT.h"
 
 namespace rotors_control
 {
 
-  PositionController::PositionController()
+  PositionControllerRPYT::PositionControllerRPYT()
       : initialized_params_(false),
         controller_active_(false)
   {
     InitializeParameters();
   }
 
-  PositionController::~PositionController() {}
+  PositionControllerRPYT::~PositionControllerRPYT() {}
 
-  void PositionController::InitializeParameters()
+  void PositionControllerRPYT::InitializeParameters()
   {
     calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
     // To make the tuning independent of the inertia matrix we divide here.
@@ -53,19 +53,19 @@ namespace rotors_control
     initialized_params_ = true;
   }
 
-  void PositionController::SetOdometry(const EigenOdometry &odometry)
+  void PositionControllerRPYT::SetOdometry(const EigenOdometry &odometry)
   {
     odometry_ = odometry;
   }
 
-  void PositionController::SetTrajectoryPoint(
+  void PositionControllerRPYT::SetTrajectoryPoint(
       const mav_msgs::EigenTrajectoryPoint &command_trajectory)
   {
     command_trajectory_ = command_trajectory;
     controller_active_ = true;
   }
 
-  void PositionController::ComputeDesiredAcceleration(Eigen::Vector3d *acceleration) const
+  void PositionControllerRPYT::ComputeDesiredAcceleration(Eigen::Vector3d *acceleration) const
   {
     assert(acceleration);
 
@@ -85,7 +85,7 @@ namespace rotors_control
 
 #if (_DEBUG_TORQUE_THRUST_)
 
-  void PositionController::ComputeDesiredAttitude(const Eigen::Vector3d &acceleration, Eigen::Quaterniond *desired_attitude) const
+  void PositionControllerRPYT::ComputeDesiredAttitude(const Eigen::Vector3d &acceleration, Eigen::Quaterniond *desired_attitude) const
   {
     assert(desired_attitude);
 
@@ -113,7 +113,7 @@ namespace rotors_control
 
   }
 
-  void PositionController::CalculateAttiThrust(mav_msgs::AttitudeThrust *atti_thrust) const
+  void PositionControllerRPYT::CalculateAttiThrust(mav_msgs::AttitudeThrust *atti_thrust) const
   {
     assert(atti_thrust);
     assert(initialized_params_);
