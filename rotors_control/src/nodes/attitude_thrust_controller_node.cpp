@@ -76,10 +76,10 @@ namespace rotors_control
   }
 
   void AttitudeThrustControllerNode::AttitudeThrustCallback(
-      const mav_msgs::AttitudeThrustConstPtr &attitude_thrust_reference_msg)
+      const mav_msgs::RollPitchYawrateThrustConstPtr &attitude_thrust_reference_msg)
   {
-    mav_msgs::EigenAttitudeThrust attitude_thrust;
-    mav_msgs::eigenAttitudeThrustFromMsg(*attitude_thrust_reference_msg, &attitude_thrust);
+    mav_msgs::EigenRollPitchYawrateThrust attitude_thrust;
+    mav_msgs::eigenRollPitchYawrateThrustFromMsg(*attitude_thrust_reference_msg, &attitude_thrust);
     attitude_thrust_controller_.SetAttitudeThrust(attitude_thrust);
   }
 

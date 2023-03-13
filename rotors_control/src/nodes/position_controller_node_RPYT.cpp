@@ -50,7 +50,7 @@ namespace rotors_control
     odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
                                   &PositionControllerRPYTNode::OdometryCallback, this);
 
-    attitude_thrust_reference_pub_ = nh_.advertise<mav_msgs::AttitudeThrust>(
+    attitude_thrust_reference_pub_ = nh_.advertise<mav_msgs::RollPitchYawrateThrust>(
         kDefaultCommandAttitudeThrustTopic, 1);
 
     command_timer_ = nh_.createTimer(ros::Duration(0), &PositionControllerRPYTNode::TimedCommandCallback, this,
@@ -180,7 +180,7 @@ namespace rotors_control
 #if (_TUNE_PARAMETERS_)
     InitializeParams();
 #endif
-    mav_msgs::AttitudeThrust ref_atti_thrust;
+    mav_msgs::RollPitchYawrateThrust ref_atti_thrust;
 
     //ref_atti_thrust is in FLU coordinate!!
     position_controller_.CalculateAttiThrust(&ref_atti_thrust);

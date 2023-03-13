@@ -85,7 +85,7 @@ namespace rotors_control
   }
 
   void AttitudeThrustController::SetAttitudeThrust(
-      const mav_msgs::EigenAttitudeThrust &attitude_thrust)
+      const mav_msgs::EigenRollPitchYawrateThrust &attitude_thrust)
   {
     attitude_thrust_ = attitude_thrust;
     controller_active_ = true;
@@ -107,7 +107,9 @@ namespace rotors_control
 
     // Get the desired rotation matrix. 321
     Eigen::Matrix3d R_des;
-    R_des = attitude_thrust_.attitude;
+        R_des =  Eigen::AngleAxisd(attitude_thrust_.yaw_rate, Eigen::Vector3d::UnitZ())                                // yaw
+            * Eigen::AngleAxisd(attitude_thrust_.pitch, Eigen::Vector3d::UnitY()) // pitch
+            * Eigen::AngleAxisd(attitude_thrust_.roll, Eigen::Vector3d::UnitX()); 
 
     // Angle error according to lee et al.
     Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
@@ -150,7 +152,9 @@ namespace rotors_control
     Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
     // Get the desired rotation matrix. 321
     Eigen::Matrix3d R_des;
-    R_des = attitude_thrust_.attitude;
+    R_des =  Eigen::AngleAxisd(attitude_thrust_.yaw_rate, Eigen::Vector3d::UnitZ())                                // yaw
+            * Eigen::AngleAxisd(attitude_thrust_.pitch, Eigen::Vector3d::UnitY()) // pitch
+            * Eigen::AngleAxisd(attitude_thrust_.roll, Eigen::Vector3d::UnitX()); 
 
     // Angle error according to lee et al.
     Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);

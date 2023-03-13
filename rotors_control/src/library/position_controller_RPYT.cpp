@@ -85,9 +85,9 @@ namespace rotors_control
 
 #if (_DEBUG_TORQUE_THRUST_)
 
-  void PositionControllerRPYT::ComputeDesiredAttitude(const Eigen::Vector3d &acceleration, Eigen::Quaterniond *desired_attitude) const
+  void PositionControllerRPYT::ComputeDesiredAttitude(const Eigen::Vector3d &acceleration, Eigen::Vector3d *desired_angle) const
   {
-    assert(desired_attitude);
+    assert(desired_angle);
 
     // Get the desired rotation matrix.
     Eigen::Vector3d b1_des;
@@ -109,11 +109,13 @@ namespace rotors_control
     R_des.col(2) = b3_des;
     // in FLU
 
-    *desired_attitude = R_des;
+    Eigen::Vector3d YPR = R_des.eulerAngles(2, 1, 0);
+
+    *desired_angle = YPR;
 
   }
 
-  void PositionControllerRPYT::CalculateAttiThrust(mav_msgs::AttitudeThrust *atti_thrust) const
+  void PositionControllerRPYT::CalculateAttiThrust(mav_msgs::RollPitchYawrateThrust *atti_thrust) const
   {
     assert(atti_thrust);
     assert(initialized_params_);
@@ -121,26 +123,24 @@ namespace rotors_control
     // Return 0 velocities on all rotors, until the first command is received.
     if (!controller_active_)
     {
-      atti_thrust->attitude.w = 1;
-      atti_thrust->attitude.x=0;
-      atti_thrust->attitude.y=0;
-      atti_thrust->attitude.z=0;
+      atti_thrust->pitch = 0;
+      atti_thrust->roll=0;
+      atti_thrust->yaw_rate=0;
       atti_thrust->thrust.z = 0;
       return;
     }
     Eigen::Vector3d acceleration;
     ComputeDesiredAcceleration(&acceleration);
 
-    Eigen::Quaterniond ref_attitude;
-    ComputeDesiredAttitude(acceleration, &ref_attitude);
+    Eigen::Vector3d angle;
+    ComputeDesiredAttitude(acceleration, &angle);
 
     // Project thrust onto body z axis.
     double thrust = -vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
     
-    atti_thrust->attitude.w = ref_attitude.w();
-    atti_thrust->attitude.x = ref_attitude.x();
-    atti_thrust->attitude.y = ref_attitude.y();
-    atti_thrust->attitude.z = ref_attitude.z();
+    atti_thrust->yaw_rate = angle(0);
+    atti_thrust->pitch = angle(1);
+    atti_thrust->roll = angle(2);
     atti_thrust->thrust.z = thrust;
   }
 

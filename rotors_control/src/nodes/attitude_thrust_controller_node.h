@@ -62,7 +62,7 @@ namespace rotors_control
     ros::Publisher motor_velocity_reference_pub_;
 
     void AttitudeThrustCallback(
-        const mav_msgs::AttitudeThrustConstPtr &attitude_thrust_reference_msg);
+        const mav_msgs::RollPitchYawrateThrustConstPtr &attitude_thrust_reference_msg);
 
     void OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg);
   };

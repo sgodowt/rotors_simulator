@@ -67,7 +67,7 @@ namespace rotors_control
 
     void SetOdometry(const EigenOdometry &odometry);
     void SetAttitudeThrust(
-        const mav_msgs::EigenAttitudeThrust &attitude_thrust);
+        const mav_msgs::EigenRollPitchYawrateThrust &attitude_thrust);
 
     AttitudeThrustControllerParameters controller_parameters_;
     VehicleParameters vehicle_parameters_;
@@ -81,7 +81,7 @@ namespace rotors_control
     Eigen::Vector3d normalized_angular_rate_gain_;
     Eigen::MatrixX4d angular_acc_to_rotor_velocities_;
 
-    mav_msgs::EigenAttitudeThrust attitude_thrust_;
+    mav_msgs::EigenRollPitchYawrateThrust attitude_thrust_;
     EigenOdometry odometry_;
 
     void ComputeDesiredAngularAcc(Eigen::Vector3d *angular_acceleration) const;

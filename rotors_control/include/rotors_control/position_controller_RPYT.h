@@ -68,8 +68,8 @@ namespace rotors_control
     void CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const;
 
 #if (_DEBUG_TORQUE_THRUST_)
-    void CalculateAttiThrust(mav_msgs::AttitudeThrust *atti_thrust) const;
-    void ComputeDesiredAttitude(const Eigen::Vector3d &acceleration, Eigen::Quaterniond *desired_attitude) const;
+    void CalculateAttiThrust(mav_msgs::RollPitchYawrateThrust *atti_thrust) const;
+    void ComputeDesiredAttitude(const Eigen::Vector3d &acceleration, Eigen::Vector3d *desired_angle) const;
 #endif
     void SetOdometry(const EigenOdometry &odometry);
     void SetTrajectoryPoint(
