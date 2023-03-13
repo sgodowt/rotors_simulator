@@ -65,7 +65,6 @@ namespace rotors_control
     PositionController();
     ~PositionController();
     void InitializeParameters();
-    void CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const;
 
 #if (_DEBUG_TORQUE_THRUST_)
     void CalculateRPYThrust(mav_msgs::RollPitchYawrateThrust *rpy_thrust) const;
@@ -93,8 +92,6 @@ namespace rotors_control
     void ComputeDesiredAngle(const Eigen::Vector3d &acceleration, Eigen::Vector3d *angle) const;
 #endif
 
-    void ComputeDesiredAngularAcc(const Eigen::Vector3d &acceleration,
-                                  Eigen::Vector3d *angular_acceleration) const;
     void ComputeDesiredAcceleration(Eigen::Vector3d *acceleration) const;
   };
 }

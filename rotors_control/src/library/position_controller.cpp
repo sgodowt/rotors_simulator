@@ -59,13 +59,7 @@ namespace rotors_control
   }
 
   void PositionController::SetTrajectoryPoint(
-      const mav_msgs::EigenTrajectoryPoint &command_trajectory)
-  {
-    command_trajectory_ = command_trajectory;
-    controller_active_ = true;
-  }
-
-  void PositionController::ComputeDesiredAcceleration(Eigen::Vector3d *acceleration) const
+      const mav_msgs::EigenTrajectoryPoint &command_trajectory)#include "rotors_control/position_controller.h"celeration) const
   {
     assert(acceleration);
 
@@ -83,45 +77,6 @@ namespace rotors_control
     *acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_) + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_ - vehicle_parameters_.gravity_ * e_3 - command_trajectory_.acceleration_W;
   }
 
-  // Implementation from the T. Lee et al. paper
-  // Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
-  void PositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d &acceleration,
-                                                       Eigen::Vector3d *angular_acceleration) const
-  {
-    assert(angular_acceleration);
-
-    Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
-
-    // Get the desired rotation matrix.
-    Eigen::Vector3d b1_des;
-    double yaw = command_trajectory_.getYaw();
-    b1_des << cos(yaw), sin(yaw), 0;
-
-    Eigen::Vector3d b3_des;
-    b3_des = -acceleration / acceleration.norm();
-
-    Eigen::Vector3d b2_des;
-    b2_des = b3_des.cross(b1_des);
-    b2_des.normalize();
-
-    Eigen::Matrix3d R_des;
-    R_des.col(0) = b2_des.cross(b3_des);
-    R_des.col(1) = b2_des;
-    R_des.col(2) = b3_des;
-
-    // Angle error according to lee et al.
-    Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
-    Eigen::Vector3d angle_error;
-    vectorFromSkewMatrix(angle_error_matrix, &angle_error);
-
-    // TODO(burrimi) include angular rate references at some point.
-    Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-    angular_rate_des[2] = command_trajectory_.getYawRate();
-
-    Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
-
-    *angular_acceleration = -1 * angle_error.cwiseProduct(normalized_attitude_gain_) - angular_rate_error.cwiseProduct(normalized_angular_rate_gain_) + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
-  }
 
 #if (_DEBUG_TORQUE_THRUST_)
   void PositionController::CalculateRPYThrust(mav_msgs::RollPitchYawrateThrust *rpy_thrust) const
@@ -160,8 +115,10 @@ namespace rotors_control
 
     // Get the desired rotation matrix.
     Eigen::Vector3d b1_des;
-    double yaw = odometry_.orientation.toRotationMatrix().eulerAngles(2, 1, 0)(0);
-    b1_des << cos(yaw), sin(yaw), 0; 
+    Eigen::Vector3d b1 = odometry_.orientation.toRotationMatrix()* Eigen::Vector3d(1,0,0);
+    b1_des << b1(0), b1(1), 0; 
+
+    double yaw = atan2(b1(1),b1(0));
 
     Eigen::Vector3d b3_des;
     b3_des = -acceleration / acceleration.norm();
