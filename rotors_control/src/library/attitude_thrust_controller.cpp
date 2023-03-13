@@ -107,7 +107,7 @@ namespace rotors_control
 
     // Get the desired rotation matrix. 321
     Eigen::Matrix3d R_des;
-        R_des =  Eigen::AngleAxisd(attitude_thrust_.yaw_rate, Eigen::Vector3d::UnitZ())                                // yaw
+    R_des = Eigen::AngleAxisd(attitude_thrust_.yaw_rate, Eigen::Vector3d::UnitZ())          
             * Eigen::AngleAxisd(attitude_thrust_.pitch, Eigen::Vector3d::UnitY()) // pitch
             * Eigen::AngleAxisd(attitude_thrust_.roll, Eigen::Vector3d::UnitX()); 
 
@@ -152,7 +152,7 @@ namespace rotors_control
     Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
     // Get the desired rotation matrix. 321
     Eigen::Matrix3d R_des;
-    R_des =  Eigen::AngleAxisd(attitude_thrust_.yaw_rate, Eigen::Vector3d::UnitZ())                                // yaw
+    R_des = Eigen::AngleAxisd(attitude_thrust_.yaw_rate, Eigen::Vector3d::UnitZ())          
             * Eigen::AngleAxisd(attitude_thrust_.pitch, Eigen::Vector3d::UnitY()) // pitch
             * Eigen::AngleAxisd(attitude_thrust_.roll, Eigen::Vector3d::UnitX()); 
 

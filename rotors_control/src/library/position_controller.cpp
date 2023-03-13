@@ -160,8 +160,8 @@ namespace rotors_control
 
     // Get the desired rotation matrix.
     Eigen::Vector3d b1_des;
-    double yaw = command_trajectory_.getYaw();
-    b1_des << cos(yaw), sin(yaw), 0; // roll
+    double yaw = odometry_.orientation.toRotationMatrix().eulerAngles(2, 1, 0)(0);
+    b1_des << cos(yaw), sin(yaw), 0; 
 
     Eigen::Vector3d b3_des;
     b3_des = -acceleration / acceleration.norm();
@@ -177,6 +177,10 @@ namespace rotors_control
     // in FLU
 
     Eigen::Vector3d YPR = R_des.eulerAngles(2, 1, 0);
+
+    //std::cout << "posi R_des:" << R_des <<std::endl;
+    std::cout << "pitch:" << YPR(1)  << "roll:" << YPR(2)  << "yaw:" << YPR(0)  << "yaw_cal:" << yaw <<std::endl;
+
     // TODO(burrimi) include angular rate references at some point.
     Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
     angular_rate_des[2] = command_trajectory_.getYawRate();

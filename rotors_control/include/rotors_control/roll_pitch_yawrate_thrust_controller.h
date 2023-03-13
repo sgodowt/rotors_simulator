@@ -59,7 +59,6 @@ namespace rotors_control
     RollPitchYawrateThrustController();
     ~RollPitchYawrateThrustController();
     void InitializeParameters();
-    void CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const;
 
 #if (_DEBUG_TORQUE_THRUST_)
     void CalculateTorqueThrust(Eigen::Vector4d *torque_thrust) const;
@@ -84,7 +83,6 @@ namespace rotors_control
     mav_msgs::EigenRollPitchYawrateThrust roll_pitch_yawrate_thrust_;
     EigenOdometry odometry_;
 
-    void ComputeDesiredAngularAcc(Eigen::Vector3d *angular_acceleration) const;
 #if (_DEBUG_TORQUE_THRUST_)
     void ComputeDesiredTorque(Eigen::Vector3d *desired_torque) const;
 #endif

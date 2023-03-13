@@ -54,30 +54,6 @@ namespace rotors_control
     initialized_params_ = true;
   }
 
-  void RollPitchYawrateThrustController::CalculateRotorVelocities(Eigen::VectorXd *rotor_velocities) const
-  {
-    assert(rotor_velocities);
-    assert(initialized_params_);
-
-    rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
-    // Return 0 velocities on all rotors, until the first command is received.
-    if (!controller_active_)
-    {
-      *rotor_velocities = Eigen::VectorXd::Zero(rotor_velocities->rows());
-      return;
-    }
-
-    Eigen::Vector3d angular_acceleration;
-    ComputeDesiredAngularAcc(&angular_acceleration);
-
-    Eigen::Vector4d angular_acceleration_thrust;
-    angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
-    angular_acceleration_thrust(3) = roll_pitch_yawrate_thrust_.thrust.z();
-
-    *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
-    *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
-    *rotor_velocities = rotor_velocities->cwiseSqrt();
-  }
 
   void RollPitchYawrateThrustController::SetOdometry(const EigenOdometry &odometry)
   {
@@ -91,40 +67,6 @@ namespace rotors_control
     controller_active_ = true;
   }
 
-  // Implementation from the T. Lee et al. paper
-  // Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
-  void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d *angular_acceleration) const
-  {
-    assert(angular_acceleration);
-
-    Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
-    double yaw = atan2(R(1, 0), R(0, 0));
-
-    // Get the desired rotation matrix. 312
-    // Eigen::Matrix3d R_des;
-    // R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())  // yaw
-    //       * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX())  // roll
-    //       * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY());  // pitch
-
-    // Get the desired rotation matrix. 321
-    Eigen::Matrix3d R_des;
-    R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())                                // yaw
-            * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY()) // pitch
-            * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX()); // roll
-
-    // Angle error according to lee et al.
-    Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
-    Eigen::Vector3d angle_error;
-    vectorFromSkewMatrix(angle_error_matrix, &angle_error);
-
-    // TODO(burrimi) include angular rate references at some point.
-    Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-    angular_rate_des[2] = roll_pitch_yawrate_thrust_.yaw_rate;
-
-    Eigen::Vector3d angular_rate_error = odometry_.angular_velocity -R.transpose() * R_des* angular_rate_des;
-
-    *angular_acceleration = -1 * angle_error.cwiseProduct(normalized_attitude_gain_) - angular_rate_error.cwiseProduct(normalized_angular_rate_gain_) + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
-  }
 
 #if (_DEBUG_TORQUE_THRUST_)
   void RollPitchYawrateThrustController::CalculateTorqueThrust(Eigen::Vector4d *torque_thrust) const
@@ -151,13 +93,14 @@ namespace rotors_control
     assert(desired_torque);
 
     Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
-    double yaw = atan2(R(1, 0), R(0, 0));
+    double yaw = R.eulerAngles(2,1,0)(0);
 
     // Get the desired rotation matrix. 321
     Eigen::Matrix3d R_des;
-    R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())                                // yaw
+    R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())                             // yaw
             * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY()) // pitch
-            * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX()); // roll
+            * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX());     //roll; 
+    std::cout << "pitch:" << roll_pitch_yawrate_thrust_.pitch << "roll:" << roll_pitch_yawrate_thrust_.roll << "yaw:" << yaw <<std::endl;
     //std::cout<<"R_test:" << R_des  << std::endl;
     // Angle error according to lee et al.
     Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
