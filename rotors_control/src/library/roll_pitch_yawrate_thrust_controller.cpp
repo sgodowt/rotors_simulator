@@ -94,6 +94,8 @@ namespace rotors_control
 
     Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
     double yaw = R.eulerAngles(2,1,0)(0);
+    //Eigen::Vector3d b1 =  R * Eigen::Vector3d(1,0,0);
+    //double yaw = atan2(b1(1),b1(0));
 
     // Get the desired rotation matrix. 321
     Eigen::Matrix3d R_des;

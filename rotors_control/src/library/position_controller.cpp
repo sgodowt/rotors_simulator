@@ -59,7 +59,13 @@ namespace rotors_control
   }
 
   void PositionController::SetTrajectoryPoint(
-      const mav_msgs::EigenTrajectoryPoint &command_trajectory)#include "rotors_control/position_controller.h"celeration) const
+      const mav_msgs::EigenTrajectoryPoint &command_trajectory)
+  {
+    command_trajectory_ = command_trajectory;
+    controller_active_ = true;
+  }
+
+  void PositionController::ComputeDesiredAcceleration(Eigen::Vector3d *acceleration) const
   {
     assert(acceleration);
 
@@ -113,6 +119,11 @@ namespace rotors_control
   {
     assert(desired_angle);
 
+    //this comment codes below will cause unstable, althought the yaw is the same.
+    // Eigen::Vector3d b1_des;
+    // double yaw = odometry_.orientation.toRotationMatrix().eulerAngles(2, 1, 0)(0);
+    // b1_des << cos(yaw), sin(yaw), 0; 
+
     // Get the desired rotation matrix.
     Eigen::Vector3d b1_des;
     Eigen::Vector3d b1 = odometry_.orientation.toRotationMatrix()* Eigen::Vector3d(1,0,0);
@@ -133,10 +144,14 @@ namespace rotors_control
     R_des.col(2) = b3_des;
     // in FLU
 
+    Eigen::Vector3d b1_d = R_des * Eigen::Vector3d(1,0,0);
+
+    double yaw_d = atan2(b1(1),b1(0));
+
     Eigen::Vector3d YPR = R_des.eulerAngles(2, 1, 0);
 
     //std::cout << "posi R_des:" << R_des <<std::endl;
-    std::cout << "pitch:" << YPR(1)  << "roll:" << YPR(2)  << "yaw:" << YPR(0)  << "yaw_cal:" << yaw <<std::endl;
+    std::cout << "YPR(1):" << YPR(1)<< "YPR(2):" << YPR(2) << "YPR(0):" << YPR(0) << "yaw:" << yaw << "yaw_d:" << yaw_d  <<std::endl;
 
     // TODO(burrimi) include angular rate references at some point.
     Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
