@@ -109,9 +109,12 @@ namespace rotors_control
     R_des.col(2) = b3_des;
     // in FLU
 
-    Eigen::Vector3d YPR = R_des.eulerAngles(2, 1, 0);
 
-    *desired_angle = YPR;
+    Eigen::Quaterniond Q_des(R_des);
+    Eigen::Vector3d RPY;
+    getEulerAnglesFromQuaternion(Q_des,&RPY);
+
+    *desired_angle = RPY;
 
   }
 
@@ -138,9 +141,9 @@ namespace rotors_control
     // Project thrust onto body z axis.
     double thrust = -vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
     
-    atti_thrust->yaw_rate = angle(0);
+    atti_thrust->roll = angle(0);
     atti_thrust->pitch = angle(1);
-    atti_thrust->roll = angle(2);
+    atti_thrust->yaw_rate = angle(2);
     atti_thrust->thrust.z = thrust;
   }
 

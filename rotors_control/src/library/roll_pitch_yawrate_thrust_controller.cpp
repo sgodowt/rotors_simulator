@@ -92,8 +92,11 @@ namespace rotors_control
   {
     assert(desired_torque);
 
-    Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
-    double yaw = R.eulerAngles(2,1,0)(0);
+    Eigen::Quaterniond Q = odometry_.orientation;
+    Eigen::Matrix3d R = Q.toRotationMatrix();
+    Eigen::Vector3d RPY;
+    getEulerAnglesFromQuaternion(Q,&RPY);
+    double yaw = RPY(2);
     //Eigen::Vector3d b1 =  R * Eigen::Vector3d(1,0,0);
     //double yaw = atan2(b1(1),b1(0));
 
@@ -102,7 +105,18 @@ namespace rotors_control
     R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())                             // yaw
             * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY()) // pitch
             * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX());     //roll; 
-    std::cout << "pitch:" << roll_pitch_yawrate_thrust_.pitch << "roll:" << roll_pitch_yawrate_thrust_.roll << "yaw:" << yaw <<std::endl;
+    // Eigen::Vector3d RPY_des_1(roll_pitch_yawrate_thrust_.roll,roll_pitch_yawrate_thrust_.pitch,yaw);
+    // Eigen::Matrix3d R_des_1;
+    // getRotationMatrixFromEulerAngles(RPY_des_1,&R_des_1);     //roll; 
+
+    Eigen::Quaterniond Q_des(R_des);
+    Eigen::Vector3d RPY_des;
+    getEulerAnglesFromQuaternion(Q_des,&RPY_des);
+    //std::cout << "R_des"<<R_des<<"R_des_1"<<R_des_1 <<std::endl;
+    
+    //std::cout << "roll:" << roll_pitch_yawrate_thrust_.roll  << "pitch:" << roll_pitch_yawrate_thrust_.pitch << "yaw:" << yaw <<std::endl;
+    //std::cout << "RPY_des(0):" << RPY_des(0) << "RPY_des(1):" << RPY_des(1) << "RPY_des(2):" << RPY_des(2) <<std::endl;
+
     //std::cout<<"R_test:" << R_des  << std::endl;
     // Angle error according to lee et al.
     Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);

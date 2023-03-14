@@ -132,6 +132,30 @@ namespace rotors_control
   {
     *vector << skew_matrix(2, 1), skew_matrix(0, 2), skew_matrix(1, 0);
   }
+
+inline void getEulerAnglesFromQuaternion(const Eigen::Quaternion<double>& q,
+                                         Eigen::Vector3d* euler_angles) {
+    assert(euler_angles != NULL);
+
+    *euler_angles << std::atan2(2.0 * (q.w() * q.x() + q.y() * q.z()),
+                           1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y())),
+        std::asin(2.0 * (q.w() * q.y() - q.z() * q.x())),
+        std::atan2(2.0 * (q.w() * q.z() + q.x() * q.y()),
+              1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z()));
+}
+
+
+// inline void getRotationMatrixFromEulerAngles(const Eigen::Vector3d& euler_angles,
+//                                         Eigen::Matrix3d *R) {
+//     assert(R != NULL);
+//     Eigen::Matrix3d R_x, R_y, R_z;
+//     R_z << cos(euler_angles.z()),-sin(euler_angles.z()),0,sin(euler_angles.z()),cos(euler_angles.z()),0,0,0,1;
+//     R_y << cos(euler_angles.y()),0,sin(euler_angles.y()),0,1,0,-sin(euler_angles.y()),0,cos(euler_angles.y());
+//     R_x <<1,0,0,0,cos(euler_angles.x()),-sin(euler_angles.x()),0,sin(euler_angles.x()),cos(euler_angles.x());
+//     *R = R_z*R_y*R_x;
+// }
+
+
 }
 
 #endif /* INCLUDE_ROTORS_CONTROL_COMMON_H_ */

@@ -144,22 +144,23 @@ namespace rotors_control
     R_des.col(2) = b3_des;
     // in FLU
 
-    Eigen::Vector3d b1_d = R_des * Eigen::Vector3d(1,0,0);
+    // Eigen::Vector3d b1_d = R_des * Eigen::Vector3d(1,0,0);
+    // double yaw_d = atan2(b1(1),b1(0));
 
-    double yaw_d = atan2(b1(1),b1(0));
-
-    Eigen::Vector3d YPR = R_des.eulerAngles(2, 1, 0);
+    Eigen::Quaterniond Q_des(R_des);
+    Eigen::Vector3d RPY;
+    getEulerAnglesFromQuaternion(Q_des,&RPY);
 
     //std::cout << "posi R_des:" << R_des <<std::endl;
-    std::cout << "YPR(1):" << YPR(1)<< "YPR(2):" << YPR(2) << "YPR(0):" << YPR(0) << "yaw:" << yaw << "yaw_d:" << yaw_d  <<std::endl;
+    //std::cout << "RPY(0):" << RPY(0)<< "RPY(1) " << RPY(1) << "RPY(2):" << RPY(2) << "yaw_feed:" << yaw << "yaw_d:" << yaw_d  <<std::endl;
 
     // TODO(burrimi) include angular rate references at some point.
     Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
     angular_rate_des[2] = command_trajectory_.getYawRate();
 
     Eigen::Vector3d RPYawrate;
-    RPYawrate(0)=YPR(2);
-    RPYawrate(1)=YPR(1);    
+    RPYawrate(0)=RPY(0);
+    RPYawrate(1)=RPY(1);    
     RPYawrate(2)=angular_rate_des[2]; 
     *desired_angle=RPYawrate;
 
