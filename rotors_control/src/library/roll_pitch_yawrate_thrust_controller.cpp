@@ -115,7 +115,7 @@ namespace rotors_control
     //std::cout << "R_des"<<R_des<<"R_des_1"<<R_des_1 <<std::endl;
     
     //std::cout << "roll:" << roll_pitch_yawrate_thrust_.roll  << "pitch:" << roll_pitch_yawrate_thrust_.pitch << "yaw:" << yaw <<std::endl;
-    //std::cout << "RPY_des(0):" << RPY_des(0) << "RPY_des(1):" << RPY_des(1) << "RPY_des(2):" << RPY_des(2) <<std::endl;
+    //std::cout <<"yaw:" << yaw <<std::endl;
 
     //std::cout<<"R_test:" << R_des  << std::endl;
     // Angle error according to lee et al.

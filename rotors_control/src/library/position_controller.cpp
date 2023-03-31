@@ -65,24 +65,6 @@ namespace rotors_control
     controller_active_ = true;
   }
 
-  void PositionController::ComputeDesiredAcceleration(Eigen::Vector3d *acceleration) const
-  {
-    assert(acceleration);
-
-    Eigen::Vector3d position_error;
-    position_error = odometry_.position - command_trajectory_.position_W;
-
-    // Transform velocity to world frame.
-    const Eigen::Matrix3d R_W_I = odometry_.orientation.toRotationMatrix();
-    Eigen::Vector3d velocity_W = R_W_I * odometry_.velocity;
-    Eigen::Vector3d velocity_error;
-    velocity_error = velocity_W - command_trajectory_.velocity_W;
-
-    Eigen::Vector3d e_3(Eigen::Vector3d::UnitZ());
-    /*compared with paper of LEE(15), the reference frame in paper is FRD, here is FLU, thus reverse gravity*/
-    *acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_) + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_ - vehicle_parameters_.gravity_ * e_3 - command_trajectory_.acceleration_W;
-  }
-
 
 #if (_DEBUG_TORQUE_THRUST_)
   void PositionController::CalculateRPYThrust(mav_msgs::RollPitchYawrateThrust *rpy_thrust) const
@@ -100,71 +82,60 @@ namespace rotors_control
       return;
     }
     Eigen::Vector3d acceleration;
-    ComputeDesiredAcceleration(&acceleration);
+    Eigen::Vector3d position_error;
+    position_error = command_trajectory_.position_W - odometry_.position ;
 
-    Eigen::Vector3d angle;
-    ComputeDesiredAngle(acceleration, &angle);
+    // Transform velocity to world frame.
+    const Eigen::Matrix3d R_W_I = odometry_.orientation.toRotationMatrix();
+    Eigen::Vector3d velocity_W = R_W_I * odometry_.velocity;
+    Eigen::Vector3d velocity_error;
+    velocity_error = command_trajectory_.velocity_W-velocity_W ;
 
-    // Project thrust onto body z axis.
-    double thrust = -vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
-    
-    rpy_thrust->roll=angle(0);
-    rpy_thrust->pitch=angle(1);
-    rpy_thrust->yaw_rate=angle(2);
+    Eigen::Vector3d e_3(Eigen::Vector3d::UnitZ());
+    /*compared with paper of LEE(15), the reference frame in paper is FRD, here is FLU, thus reverse gravity*/
+    acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_) + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_ + vehicle_parameters_.gravity_ * e_3 + command_trajectory_.acceleration_W;
 
-    rpy_thrust->thrust.z = thrust;
-  }
-
-  void PositionController::ComputeDesiredAngle(const Eigen::Vector3d &acceleration, Eigen::Vector3d *desired_angle) const
-  {
-    assert(desired_angle);
-
-    //this comment codes below will cause unstable, althought the yaw is the same.
+   //this comment codes below will cause unstable, althought the yaw is the same.
     // Eigen::Vector3d b1_des;
     // double yaw = odometry_.orientation.toRotationMatrix().eulerAngles(2, 1, 0)(0);
     // b1_des << cos(yaw), sin(yaw), 0; 
 
     // Get the desired rotation matrix.
-    Eigen::Vector3d b1_des;
-    Eigen::Vector3d b1 = odometry_.orientation.toRotationMatrix()* Eigen::Vector3d(1,0,0);
-    b1_des << b1(0), b1(1), 0; 
-
-    double yaw = atan2(b1(1),b1(0));
+    /*compared with paper of LEE(15), the eular order is 312, here is 321, thus use b2_des*/
+    Eigen::Vector3d b2_des;
+    double yaw_d = atan2(odometry_.orientation.toRotationMatrix().col(0)(1),odometry_.orientation.toRotationMatrix().col(0)(0)) ;
+    b2_des << -sin(yaw_d), cos(yaw_d), 0;  //321
 
     Eigen::Vector3d b3_des;
-    b3_des = -acceleration / acceleration.norm();
-
-    Eigen::Vector3d b2_des;
-    b2_des = b3_des.cross(b1_des);
-    b2_des.normalize();
-
+    b3_des = acceleration.normalized();
+    
     Eigen::Matrix3d R_des;
-    R_des.col(0) = b2_des.cross(b3_des);
-    R_des.col(1) = b2_des;
+    R_des.col(0) = b2_des.cross(b3_des).normalized();
+    R_des.col(1) = b3_des.cross(R_des.col(0)).normalized();
     R_des.col(2) = b3_des;
     // in FLU
 
-    // Eigen::Vector3d b1_d = R_des * Eigen::Vector3d(1,0,0);
-    // double yaw_d = atan2(b1(1),b1(0));
+    //Eigen::Vector3d b1_d = R_des.col(0);
+    //double yaw_des = atan2(b1_d(1),b1_d(0));
 
     Eigen::Quaterniond Q_des(R_des);
-    Eigen::Vector3d RPY;
-    getEulerAnglesFromQuaternion(Q_des,&RPY);
-
+    Eigen::Vector3d RPY_des;
+    getEulerAnglesFromQuaternion(Q_des,&RPY_des);
     //std::cout << "posi R_des:" << R_des <<std::endl;
-    //std::cout << "RPY(0):" << RPY(0)<< "RPY(1) " << RPY(1) << "RPY(2):" << RPY(2) << "yaw_feed:" << yaw << "yaw_d:" << yaw_d  <<std::endl;
+    //std::cout << "yaw_feed:" << yaw_d << "yaw_d:" << yaw_des <<std::endl;
 
     // TODO(burrimi) include angular rate references at some point.
-    Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-    angular_rate_des[2] = command_trajectory_.getYawRate();
 
-    Eigen::Vector3d RPYawrate;
-    RPYawrate(0)=RPY(0);
-    RPYawrate(1)=RPY(1);    
-    RPYawrate(2)=angular_rate_des[2]; 
-    *desired_angle=RPYawrate;
+    // Project thrust onto body z axis.
+    double thrust = vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
+    
+    rpy_thrust->roll=RPY_des(0);
+    rpy_thrust->pitch=RPY_des(1);
+    rpy_thrust->yaw_rate=command_trajectory_.getYawRate(); 
 
+    rpy_thrust->thrust.z = thrust;
   }
+
 #endif
 
 }
