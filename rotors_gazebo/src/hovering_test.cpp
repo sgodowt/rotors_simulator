@@ -26,8 +26,11 @@
 #include <cmath>
 #include <Eigen/Core>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
+
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
+#include <mav_msgs/PosYaw.h>
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
@@ -52,20 +55,31 @@ void rollCallback(const std_msgs::Float64::ConstPtr &msg)
   vy = -msg->data;
 };
 
+void referencePoseCallback(const mav_msgs::PosYawConstPtr &msg)
+{
+  x=msg->position.x;
+  y=msg->position.y;
+  z=msg->position.z;
+  yaw= msg->yaw;
+};
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
   // Create a private node handle for accessing node parameters.
   ros::NodeHandle nh_private("~");
-  ros::Publisher trajectory_pub =
-      nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
-          mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
+  ros::Publisher pose_pub =
+      nh.advertise<geometry_msgs::PoseStamped>(
+          mav_msgs::default_topics::COMMAND_POSE, 10);
 
   ros::Subscriber z_sub = nh.subscribe("/LH_joy_y", 1, &zCallback);
   ros::Subscriber yawrate_sub = nh.subscribe("/LH_joy_x", 1, &yawrateCallback);
   ros::Subscriber pitch_sub = nh.subscribe("/RH_joy_y", 1, &pitchCallback);
   ros::Subscriber roll_sub = nh.subscribe("/RH_joy_x", 1, &rollCallback);
+
+  ros::Subscriber reference_pose_sub = nh.subscribe("/reference_pose", 1, &referencePoseCallback);
+
 
   ros::Rate loop_rate(50);
   ROS_INFO("Started hovering example.");
@@ -96,31 +110,38 @@ int main(int argc, char **argv)
   // Wait for 5 seconds to let the Gazebo GUI show up.
   // ros::Duration(5.0).sleep();
 
-  trajectory_msgs::MultiDOFJointTrajectory trajectory_msg;
-  trajectory_msg.header.stamp = ros::Time::now();
+  geometry_msgs::PoseStamped pose_msg;
+  pose_msg.header.stamp = ros::Time::now();
 
   // Default desired position and yaw.
-  Eigen::Vector3d desired_position(0.0, 0.0, 2.0);
-  double desired_yaw = 0.0;
+  x=0;
+  y=0;
+  z=2;
+  yaw=0;
 
   // Overwrite defaults if set as node parameters.
-  nh_private.param("x", desired_position.x(), desired_position.x());
-  nh_private.param("y", desired_position.y(), desired_position.y());
-  nh_private.param("z", desired_position.z(), desired_position.z());
-  nh_private.param("yaw", desired_yaw, desired_yaw);
+  nh_private.param("x", x, x);
+  nh_private.param("y", y, y);
+  nh_private.param("z", z, z);
+  nh_private.param("yaw", yaw, yaw);
 
-  mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(
-      desired_position, desired_yaw, &trajectory_msg);
+  Eigen::Quaterniond q;
+  q = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ());
 
+  pose_msg.pose.position.x = x;
+  pose_msg.pose.position.y = y;
+  pose_msg.pose.position.z = z;  
+  pose_msg.pose.orientation.w = q.w();
+  pose_msg.pose.orientation.x = q.x();
+  pose_msg.pose.orientation.y = q.y();
+  pose_msg.pose.orientation.z = q.z();
   ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
-           nh.getNamespace().c_str(), desired_position.x(),
-           desired_position.y(), desired_position.z());
-  trajectory_pub.publish(trajectory_msg);
+           nh.getNamespace().c_str(), x,
+           y, z);
+  pose_pub.publish(pose_msg);
 
   while (ros::ok())
   {
-
-    trajectory_msg.header.stamp = ros::Time::now();
 
     double vx_n = 0, vy_n = 0;
 
@@ -131,16 +152,20 @@ int main(int argc, char **argv)
 
     z += vz * 0.1 * 0.02;
     yaw += yawrate * 0.1 * 0.02;
-    // Default desired position and yaw.
-    desired_position(0) = x;
-    desired_position(1) = y;
-    desired_position(2) = z;
-    desired_yaw = yaw;
 
-    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(
-        desired_position, desired_yaw, &trajectory_msg);
+    pose_msg.header.stamp = ros::Time::now();
 
-    trajectory_pub.publish(trajectory_msg);
+  q = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ());
+
+  pose_msg.pose.position.x = x;
+  pose_msg.pose.position.y = y;
+  pose_msg.pose.position.z = z;  
+  pose_msg.pose.orientation.w = q.w();
+  pose_msg.pose.orientation.x = q.x();
+  pose_msg.pose.orientation.y = q.y();
+  pose_msg.pose.orientation.z = q.z();
+
+    pose_pub.publish(pose_msg);
 
     ros::spinOnce();
 

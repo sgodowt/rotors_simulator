@@ -156,15 +156,15 @@ inline void getEulerAnglesFromQuaternion(const Eigen::Quaternion<double>& q,
 // }
 
 
-inline void getEulerAnglesFromRotationMatrix(const Eigen::Matrix3d R,
-                                        Eigen::Vector3d *eular_angles) {
-    //did not complete all of the possible angles
-    assert(eular_angles != NULL);
-    double yaw = atan2(R(1,0),R(0,0));
-    double pitch = asin(-R(2,0));
-    double roll = atan2(R(2,1),R(2,2));
-    *eular_angles = Eigen::Vector3d(roll, pitch ,yaw);
-}
+// inline void getEulerAnglesFromRotationMatrix(const Eigen::Matrix3d R,
+//                                         Eigen::Vector3d *eular_angles) {
+//     //did not complete all of the possible angles
+//     assert(eular_angles != NULL);
+//     double yaw = atan2(R(1,0),R(0,0));
+//     double pitch = asin(-R(2,0));
+//     double roll = atan2(R(2,1),R(2,2));
+//     *eular_angles = Eigen::Vector3d(roll, pitch ,yaw);
+// }
 
 }
 

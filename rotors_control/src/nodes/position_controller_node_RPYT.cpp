@@ -27,7 +27,7 @@
 
 #include "rotors_control/parameters_ros.h"
 
-#define _TUNE_PARAMETERS_ 1
+#define _TUNE_PARAMETERS_ 0
 
 namespace rotors_control
 {
@@ -43,18 +43,11 @@ namespace rotors_control
         mav_msgs::default_topics::COMMAND_POSE, 1,
         &PositionControllerRPYTNode::CommandPoseCallback, this);
 
-    cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
-        mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
-        &PositionControllerRPYTNode::MultiDofJointTrajectoryCallback, this);
-
     odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
                                   &PositionControllerRPYTNode::OdometryCallback, this);
 
     attitude_thrust_reference_pub_ = nh_.advertise<mav_msgs::RollPitchYawrateThrust>(
         kDefaultCommandAttitudeThrustTopic, 1);
-
-    command_timer_ = nh_.createTimer(ros::Duration(0), &PositionControllerRPYTNode::TimedCommandCallback, this,
-                                     true, false);
   }
 
   PositionControllerRPYTNode::~PositionControllerRPYTNode() {}
@@ -92,9 +85,9 @@ namespace rotors_control
       const geometry_msgs::PoseStampedConstPtr &pose_msg)
   {
     // Clear all pending commands.
-    command_timer_.stop();
+    //command_timer_.stop();
     commands_.clear();
-    command_waiting_times_.clear();
+    //command_waiting_times_.clear();
 
     mav_msgs::EigenTrajectoryPoint eigen_reference;
     mav_msgs::eigenTrajectoryPointFromPoseMsg(*pose_msg, &eigen_reference);
@@ -104,74 +97,33 @@ namespace rotors_control
     commands_.pop_front();
   }
 
-  void PositionControllerRPYTNode::MultiDofJointTrajectoryCallback(
-      const trajectory_msgs::MultiDOFJointTrajectoryConstPtr &msg)
-  {
-    // Clear all pending commands.
-    command_timer_.stop();
-    commands_.clear();
-    command_waiting_times_.clear();
 
-    const size_t n_commands = msg->points.size();
+  // void PositionControllerRPYTNode::TimedCommandCallback(const ros::TimerEvent &e)
+  // {
 
-    if (n_commands < 1)
-    {
-      ROS_WARN_STREAM("Got MultiDOFJointTrajectory message, but message has no points.");
-      return;
-    }
+  //   if (commands_.empty())
+  //   {
+  //     ROS_WARN("Commands empty, this should not happen here");
+  //     return;
+  //   }
 
-    mav_msgs::EigenTrajectoryPoint eigen_reference;
-    mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
-    commands_.push_front(eigen_reference);
-
-    for (size_t i = 1; i < n_commands; ++i)
-    {
-      const trajectory_msgs::MultiDOFJointTrajectoryPoint &reference_before = msg->points[i - 1];
-      const trajectory_msgs::MultiDOFJointTrajectoryPoint &current_reference = msg->points[i];
-
-      mav_msgs::eigenTrajectoryPointFromMsg(current_reference, &eigen_reference);
-
-      commands_.push_back(eigen_reference);
-      command_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
-    }
-
-    // We can trigger the first command immediately.
-    position_controller_.SetTrajectoryPoint(commands_.front());
-    commands_.pop_front();
-
-    if (n_commands > 1)
-    {
-      command_timer_.setPeriod(command_waiting_times_.front());
-      command_waiting_times_.pop_front();
-      command_timer_.start();
-    }
-  }
-
-  void PositionControllerRPYTNode::TimedCommandCallback(const ros::TimerEvent &e)
-  {
-
-    if (commands_.empty())
-    {
-      ROS_WARN("Commands empty, this should not happen here");
-      return;
-    }
-
-    const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
-    position_controller_.SetTrajectoryPoint(commands_.front());
-    commands_.pop_front();
-    command_timer_.stop();
-    if (!command_waiting_times_.empty())
-    {
-      command_timer_.setPeriod(command_waiting_times_.front());
-      command_waiting_times_.pop_front();
-      command_timer_.start();
-    }
-  }
+  //   const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
+  //   position_controller_.SetTrajectoryPoint(commands_.front());
+  //   commands_.pop_front();
+  //   command_timer_.stop();
+  //   if (!command_waiting_times_.empty())
+  //   {
+  //     command_timer_.setPeriod(command_waiting_times_.front());
+  //     command_waiting_times_.pop_front();
+  //     command_timer_.start();
+  //   }
+  // }
 
   void PositionControllerRPYTNode::OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg)
   {
 
-    ROS_INFO_ONCE("PositionControllerRPYT got first odometry message.");
+    ROS_INFO_ONCE("PositionControllerRPYT got odometry message.");
+    //ROS_INFO("%f",odometry_msg->header.stamp.toSec());
     
     EigenOdometry odometry;
     eigenOdometryFromMsg(odometry_msg, &odometry);
@@ -201,6 +153,21 @@ int main(int argc, char **argv)
   rotors_control::PositionControllerRPYTNode position_controller_node(nh, private_nh);
 
   ros::spin();
+  // ros::Rate r(100);
+  // while (ros::ok())
+  // {
+  //   //   sdk_cmd_count++;
+
+  //   //   if (sdk_cmd_count % (unsigned int)(NODEFREQ_ARMINVKINE * 5) == 0)
+  //   //   {
+ 
+  //   // }
+
+  //   // ROS_INFO("NOW");
+  //   ros::spinOnce();
+  //   r.sleep();
+
+  // } // end while()
 
   return 0;
 }

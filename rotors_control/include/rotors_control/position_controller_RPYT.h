@@ -81,8 +81,7 @@ namespace rotors_control
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   private:
     bool initialized_params_;
-    bool controller_active_;
-
+    
     Eigen::Vector3d normalized_attitude_gain_;
     Eigen::Vector3d normalized_angular_rate_gain_;
     Eigen::MatrixX4d angular_acc_to_rotor_velocities_;

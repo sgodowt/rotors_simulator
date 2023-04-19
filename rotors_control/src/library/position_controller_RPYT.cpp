@@ -26,8 +26,7 @@ namespace rotors_control
 {
 
   PositionControllerRPYT::PositionControllerRPYT()
-      : initialized_params_(false),
-        controller_active_(false)
+      : initialized_params_(false)
   {
     InitializeParameters();
   }
@@ -62,7 +61,7 @@ namespace rotors_control
       const mav_msgs::EigenTrajectoryPoint &command_trajectory)
   {
     command_trajectory_ = command_trajectory;
-    controller_active_ = true;
+
   }
 
 
@@ -75,14 +74,14 @@ namespace rotors_control
     assert(initialized_params_);
 
     // Return 0 velocities on all rotors, until the first command is received.
-    if (!controller_active_)
-    {
-      atti_thrust->pitch = 0;
-      atti_thrust->roll=0;
-      atti_thrust->yaw_rate=0;
-      atti_thrust->thrust.z = 0;
-      return;
-    }
+    // if (!controller_active_)
+    // {
+    //   atti_thrust->pitch = 0;
+    //   atti_thrust->roll=0;
+    //   atti_thrust->yaw_rate=0;
+    //   atti_thrust->thrust.z = 0;
+    //   return;
+    // }
     Eigen::Vector3d acceleration;
 
     Eigen::Vector3d position_error;
@@ -119,7 +118,7 @@ namespace rotors_control
     Eigen::Vector3d RPY;
     getEulerAnglesFromQuaternion(Q_des,&RPY);
 
-    std::cout << "yaw_feed:" << yaw << "RPY:" << RPY(2) <<std::endl;
+    //std::cout << "yaw_feed:" << yaw << "RPY:" << RPY(2) <<std::endl;
 
     desired_angle = RPY;
 

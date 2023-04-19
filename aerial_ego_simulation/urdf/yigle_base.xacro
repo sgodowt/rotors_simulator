@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <xacro:include filename="$(find aerial_ego_simulation)/urdf/yigle.xacro" />
 
   <!-- Instantiate a controller. -->
-  <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
+  <!-- <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" /> -->
 
   <!-- Instantiate a ROS message interface -->
   <!-- <xacro:ros_interface_plugin_macro namespace="${namespace}" />-->
@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   <xacro:if value="$(arg enable_logging)">
     <!-- Instantiate a logger -->
-    <xacro:bag_plugin_macro namespace="${namespace}" bag_file="$(arg log_file)" rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" wait_to_record_bag="$(arg wait_to_record_bag)" />
+    <!-- <xacro:bag_plugin_macro namespace="${namespace}" bag_file="$(arg log_file)" rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" wait_to_record_bag="$(arg wait_to_record_bag)" /> -->
   </xacro:if>
 
 </robot>

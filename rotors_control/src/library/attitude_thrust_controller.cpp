@@ -26,8 +26,7 @@ namespace rotors_control
 {
 
   AttitudeThrustController::AttitudeThrustController()
-      : initialized_params_(false),
-        controller_active_(false)
+      : initialized_params_(false)
   {
     InitializeParameters();
   }
@@ -61,11 +60,11 @@ namespace rotors_control
 
     rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
     // Return 0 velocities on all rotors, until the first command is received.
-    if (!controller_active_)
-    {
-      *rotor_velocities = Eigen::VectorXd::Zero(rotor_velocities->rows());
-      return;
-    }
+    // if (!controller_active_)
+    // {
+    //   *rotor_velocities = Eigen::VectorXd::Zero(rotor_velocities->rows());
+    //   return;
+    // }
 
     Eigen::Vector3d angular_acceleration;
     ComputeDesiredAngularAcc(&angular_acceleration);
@@ -88,7 +87,6 @@ namespace rotors_control
       const mav_msgs::EigenRollPitchYawrateThrust &attitude_thrust)
   {
     attitude_thrust_ = attitude_thrust;
-    controller_active_ = true;
   }
 
   // Implementation from the T. Lee et al. paper
@@ -132,11 +130,11 @@ namespace rotors_control
     assert(initialized_params_);
 
     // Return 0 velocities on all rotors, until the first command is received.
-    if (!controller_active_)
-    {
-      *torque_thrust = Eigen::Vector4d::Zero();
-      return;
-    }
+    // if (!controller_active_)
+    // {
+    //   *torque_thrust = Eigen::Vector4d::Zero();
+    //   return;
+    // }
 
     Eigen::Vector3d torque;
     ComputeDesiredTorque(&torque);

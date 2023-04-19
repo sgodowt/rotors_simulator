@@ -61,21 +61,13 @@ namespace rotors_control
 
     // subscribers
     ros::Subscriber cmd_trajectory_sub_;
-    ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
+    //ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
     ros::Subscriber cmd_pose_sub_;
     ros::Subscriber odometry_sub_;
 
     ros::Publisher attitude_thrust_reference_pub_;
 
-
     mav_msgs::EigenTrajectoryPointDeque commands_;
-    std::deque<ros::Duration> command_waiting_times_;
-    ros::Timer command_timer_;
-
-    void TimedCommandCallback(const ros::TimerEvent &e);
-
-    void MultiDofJointTrajectoryCallback(
-        const trajectory_msgs::MultiDOFJointTrajectoryConstPtr &trajectory_reference_msg);
 
     void CommandPoseCallback(
         const geometry_msgs::PoseStampedConstPtr &pose_msg);
