@@ -26,8 +26,13 @@ namespace rotors_control
 {
 
   PositionControllerRPYT::PositionControllerRPYT()
-      : initialized_params_(false)
-  {
+      : initialized_params_(false),
+      pos_err_integrater(initialIntegration)
+
+  {  
+    f = boost::bind(&rotors_control::PositionControllerRPYT::tune_callback,this, _1, _2);
+    server.setCallback(f);
+
     InitializeParameters();
   }
 
@@ -67,8 +72,27 @@ namespace rotors_control
 
 #if (_DEBUG_TORQUE_THRUST_)
 
+  void PositionControllerRPYT::tune_callback(rotors_control::tuneConfig &config, uint32_t level) {
+     
+     
+    controller_parameters_.integration_gain_.x() = config.i_x;
+    controller_parameters_.integration_gain_.y() = config.i_y;
+    controller_parameters_.integration_gain_.z() = config.i_z;     
 
-  void PositionControllerRPYT::CalculateAttiThrust(mav_msgs::RollPitchYawrateThrust *atti_thrust) const
+    controller_parameters_.position_gain_.x() = config.p_x;
+    controller_parameters_.position_gain_.y() = config.p_y;
+    controller_parameters_.position_gain_.z() = config.p_z;
+
+    controller_parameters_.velocity_gain_.x() = config.d_x;
+    controller_parameters_.velocity_gain_.y() = config.d_y;
+    controller_parameters_.velocity_gain_.z() = config.d_z;
+    //std::cot << "input:" << position_controller_.controller_parameters_.position_gain_.z() <<std::endl;
+
+
+  }
+
+
+  void PositionControllerRPYT::CalculateAttiThrust(mav_msgs::RollPitchYawrateThrust *atti_thrust)
   {
     assert(atti_thrust);
     assert(initialized_params_);
@@ -95,15 +119,19 @@ namespace rotors_control
 
     Eigen::Vector3d e_3(Eigen::Vector3d::UnitZ());
     /*compared with paper of LEE(15), the reference frame in paper is FRD, here is FLU, thus reverse gravity*/
-    acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_) + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_ + vehicle_parameters_.gravity_ * e_3 + command_trajectory_.acceleration_W;
+    acceleration = (pos_err_integrater.cwiseProduct(controller_parameters_.integration_gain_)+position_error.cwiseProduct(controller_parameters_.position_gain_) + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_ + vehicle_parameters_.gravity_ * e_3 + command_trajectory_.acceleration_W;
+    pos_err_integrater += position_error;
 
     Eigen::Vector3d desired_angle;
     // Get the desired rotation matrix.
-    Eigen::Vector3d b1_des;
 
     double yaw = command_trajectory_.getYaw();
+
+    // Eigen::Vector3d b1_des;
+    // b1_des << cos(yaw), sin(yaw), 0; //this makes the yaw command is aligned with yaw in 312 eular order
+
     Eigen::Vector3d b2_des;
-    b2_des << -sin(yaw), cos(yaw), 0;  //321
+    b2_des << -sin(yaw), cos(yaw), 0;  //this makes the yaw command is aligned with yaw in 321 eular order
 
     Eigen::Vector3d b3_des;
     b3_des = acceleration.normalized();
@@ -113,12 +141,20 @@ namespace rotors_control
     R_des.col(1) = b3_des.cross(R_des.col(0)).normalized();
     R_des.col(2) = b3_des;
     // in FLU
+    // Eigen::Matrix3d R_test;
+
+    // R_test.col(1) = b3_des.cross(b1_des).normalized();
+    // R_test.col(0) = R_test.col(1).cross(b3_des).normalized();
+    // R_test.col(2) = b3_des;
 
     Eigen::Quaterniond Q_des(R_des);
     Eigen::Vector3d RPY;
     getEulerAnglesFromQuaternion(Q_des,&RPY);
 
-    //std::cout << "yaw_feed:" << yaw << "RPY:" << RPY(2) <<std::endl;
+    // Eigen::Quaterniond Q_test(R_test);
+    // Eigen::Vector3d RPY_test;
+    // getEulerAnglesFromQuaternion(Q_test,&RPY_test);
+    // std::cout<< "test" <<  RPY_test(2)-yaw << "---" << RPY(2)-yaw <<std::endl;
 
     desired_angle = RPY;
 

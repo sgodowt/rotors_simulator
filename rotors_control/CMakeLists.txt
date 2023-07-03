@@ -4,15 +4,25 @@ project(rotors_control)
 add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
   geometry_msgs
   mav_msgs
   nav_msgs
   roscpp
   sensor_msgs
   cmake_modules
+  tf2
+  tf2_ros
 )
 
 find_package(Eigen3 REQUIRED)
+
+#add dynamic reconfigure api
+#find_package(catkin REQUIRED dynamic_reconfigure)
+generate_dynamic_reconfigure_options(
+  cfg/tune.cfg
+  #...
+)
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen3_INCLUDE_DIRS}
@@ -70,6 +80,10 @@ target_link_libraries(roll_pitch_yawrate_thrust_controller_node
   add_dependencies(position_controller_node_RPYT ${catkin_EXPORTED_TARGETS})
   target_link_libraries(position_controller_node_RPYT
     position_controller_RPYT ${catkin_LIBRARIES})
+
+# make sure configure headers are built before any node using them
+add_dependencies(position_controller_node_RPYT ${PROJECT_NAME}_gencfg)
+
 
   add_executable(attitude_thrust_controller_node
   src/nodes/attitude_thrust_controller_node.cpp)

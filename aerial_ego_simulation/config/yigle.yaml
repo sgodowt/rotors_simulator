@@ -2,7 +2,8 @@
 #drone 9.5
 #arms 5.9740
 #head 1.54061
-mass: 17.01461
+#mass: 17.01461
+mass: 15.01461
 inertia: {xx: 6.8902275e-1, xy: 3.1406183e-04, xz: -6.6251112e-04, yy: 6.5920645e-1, yz: 2.9107974e-04, zz: 1.0416577}
 # angle should be expressed in rad
 # direction 1 means counter clockwise, -1 clockwise

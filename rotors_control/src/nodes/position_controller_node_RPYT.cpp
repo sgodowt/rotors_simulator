@@ -27,7 +27,9 @@
 
 #include "rotors_control/parameters_ros.h"
 
-#define _TUNE_PARAMETERS_ 0
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
+
 
 namespace rotors_control
 {
@@ -43,11 +45,11 @@ namespace rotors_control
         mav_msgs::default_topics::COMMAND_POSE, 1,
         &PositionControllerRPYTNode::CommandPoseCallback, this);
 
-    odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
+    odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 10,
                                   &PositionControllerRPYTNode::OdometryCallback, this);
 
     attitude_thrust_reference_pub_ = nh_.advertise<mav_msgs::RollPitchYawrateThrust>(
-        kDefaultCommandAttitudeThrustTopic, 1);
+        kDefaultCommandAttitudeThrustTopic, 2);
   }
 
   PositionControllerRPYTNode::~PositionControllerRPYTNode() {}
@@ -74,6 +76,16 @@ namespace rotors_control
     GetRosParameter(private_nh_, "velocity_gain/z",
                     position_controller_.controller_parameters_.velocity_gain_.z(),
                     &position_controller_.controller_parameters_.velocity_gain_.z());
+
+    GetRosParameter(private_nh_, "integration_gain/x",
+                    position_controller_.controller_parameters_.integration_gain_.x(),
+                    &position_controller_.controller_parameters_.integration_gain_.x());
+                        GetRosParameter(private_nh_, "integration_gain/y",
+                    position_controller_.controller_parameters_.integration_gain_.y(),
+                    &position_controller_.controller_parameters_.integration_gain_.y());
+                        GetRosParameter(private_nh_, "integration_gain/z",
+                    position_controller_.controller_parameters_.integration_gain_.z(),
+                    &position_controller_.controller_parameters_.integration_gain_.z());
     GetVehicleParameters(private_nh_, &position_controller_.vehicle_parameters_);
     position_controller_.InitializeParameters();
   }
@@ -95,6 +107,23 @@ namespace rotors_control
 
     position_controller_.SetTrajectoryPoint(commands_.front());
     commands_.pop_front();
+
+    static tf2_ros::TransformBroadcaster br;
+    geometry_msgs::TransformStamped transformStamped;
+
+    transformStamped.header.stamp = ros::Time::now();
+    transformStamped.header.frame_id = "world";
+    transformStamped.child_frame_id = "desired position";
+    transformStamped.transform.translation.x = pose_msg->pose.position.x;
+    transformStamped.transform.translation.y = pose_msg->pose.position.y;
+    transformStamped.transform.translation.z = pose_msg->pose.position.z;
+
+    transformStamped.transform.rotation.x = pose_msg->pose.orientation.x;
+    transformStamped.transform.rotation.y = pose_msg->pose.orientation.y;
+    transformStamped.transform.rotation.z = pose_msg->pose.orientation.z;
+    transformStamped.transform.rotation.w = pose_msg->pose.orientation.w;
+    br.sendTransform(transformStamped);
+
   }
 
 
@@ -129,20 +158,35 @@ namespace rotors_control
     eigenOdometryFromMsg(odometry_msg, &odometry);
     position_controller_.SetOdometry(odometry);
 
-#if (_TUNE_PARAMETERS_)
-    InitializeParams();
-#endif
     mav_msgs::RollPitchYawrateThrust ref_atti_thrust;
-
+ 
     //ref_atti_thrust is in FLU coordinate!!
     position_controller_.CalculateAttiThrust(&ref_atti_thrust);
     ref_atti_thrust.header.stamp = odometry_msg->header.stamp;
     
     attitude_thrust_reference_pub_.publish(ref_atti_thrust);
 
+    static tf2_ros::TransformBroadcaster br;
+    geometry_msgs::TransformStamped transformStamped;
+
+    transformStamped.header.stamp = ros::Time::now();
+    transformStamped.header.frame_id = "world";
+    transformStamped.child_frame_id = "feedback";
+    transformStamped.transform.translation.x = odometry_msg->pose.pose.position.x;
+    transformStamped.transform.translation.y = odometry_msg->pose.pose.position.y;
+    transformStamped.transform.translation.z = odometry_msg->pose.pose.position.z;
+
+    transformStamped.transform.rotation.x = odometry_msg->pose.pose.orientation.x;
+    transformStamped.transform.rotation.y = odometry_msg->pose.pose.orientation.y;
+    transformStamped.transform.rotation.z = odometry_msg->pose.pose.orientation.z;
+    transformStamped.transform.rotation.w = odometry_msg->pose.pose.orientation.w;
+    br.sendTransform(transformStamped);
+
   }
 
 }
+
+
 
 int main(int argc, char **argv)
 {
@@ -153,21 +197,6 @@ int main(int argc, char **argv)
   rotors_control::PositionControllerRPYTNode position_controller_node(nh, private_nh);
 
   ros::spin();
-  // ros::Rate r(100);
-  // while (ros::ok())
-  // {
-  //   //   sdk_cmd_count++;
-
-  //   //   if (sdk_cmd_count % (unsigned int)(NODEFREQ_ARMINVKINE * 5) == 0)
-  //   //   {
- 
-  //   // }
-
-  //   // ROS_INFO("NOW");
-  //   ros::spinOnce();
-  //   r.sleep();
-
-  // } // end while()
 
   return 0;
 }

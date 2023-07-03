@@ -33,7 +33,14 @@ if(NO_ROS)
   return()
 endif()
 
-find_package(catkin REQUIRED COMPONENTS gazebo_msgs geometry_msgs mav_msgs roscpp sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure gazebo_msgs geometry_msgs mav_msgs roscpp sensor_msgs)
+
+#add dynamic reconfigure api
+#find_package(catkin REQUIRED dynamic_reconfigure)
+generate_dynamic_reconfigure_options(
+  cfg/pos_tune.cfg
+  #...
+)
 
 catkin_package(
   CATKIN_DEPENDS
@@ -61,6 +68,8 @@ add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
 add_executable(hovering_test src/hovering_test.cpp)
 target_link_libraries(hovering_test ${catkin_LIBRARIES})
 add_dependencies(hovering_test ${catkin_EXPORTED_TARGETS})
+add_dependencies(hovering_test ${PROJECT_NAME}_gencfg)
+
 
 add_executable(hovering_test_yawrate src/hovering_test_yawrate.cpp)
 target_link_libraries(hovering_test_yawrate ${catkin_LIBRARIES})

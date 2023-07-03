@@ -27,7 +27,6 @@
 
 #include "rotors_control/parameters_ros.h"
 
-#define _TUNE_PARAMETERS_ 1
 
 namespace rotors_control
 {
@@ -176,10 +175,6 @@ namespace rotors_control
     EigenOdometry odometry;
     eigenOdometryFromMsg(odometry_msg, &odometry);
     position_controller_.SetOdometry(odometry);
-
-#if (_TUNE_PARAMETERS_)
-    InitializeParams();
-#endif
 
     mav_msgs::RollPitchYawrateThrust ref_RPY_thrust;
 

@@ -25,6 +25,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>dynamic_reconfigure</depend>
   <depend>gazebo_msgs</depend>
   <depend>gazebo_plugins</depend>
   <depend>geometry_msgs</depend>

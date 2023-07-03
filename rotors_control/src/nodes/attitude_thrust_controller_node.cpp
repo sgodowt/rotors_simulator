@@ -33,13 +33,13 @@ namespace rotors_control
 
     ros::NodeHandle nh;
 
-    cmd_attitude_thrust_sub_ = nh.subscribe(kDefaultCommandAttitudeThrustTopic, 1,
+    cmd_attitude_thrust_sub_ = nh.subscribe(kDefaultCommandAttitudeThrustTopic, 2,
                                                       &AttitudeThrustControllerNode::AttitudeThrustCallback, this);
-    odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
+    odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 10,
                                  &AttitudeThrustControllerNode::OdometryCallback, this);
 #if (_DEBUG_TORQUE_THRUST_)
     torque_thrust_reference_pub_ = nh.advertise<mav_msgs::TorqueThrust>(
-        kDefaultCommandTorqueThrustTopic, 1);
+        kDefaultCommandTorqueThrustTopic, 2);
 #endif
 
     motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(

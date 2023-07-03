@@ -39,6 +39,7 @@
 #include "rotors_control/common.h"
 #include "rotors_control/position_controller_RPYT.h"
 
+
 namespace rotors_control
 {
 
@@ -73,6 +74,7 @@ namespace rotors_control
         const geometry_msgs::PoseStampedConstPtr &pose_msg);
 
     void OdometryCallback(const nav_msgs::OdometryConstPtr &odometry_msg);
+    
   };
 }
 

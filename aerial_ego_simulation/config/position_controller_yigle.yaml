@@ -1,3 +1,4 @@
 # Lee position controller parameters
-position_gain: {x: 20.0, y: 20.0, z: 20.0}
-velocity_gain: {x: 20.0, y: 20.0, z: 20.0}
+position_gain: {x: 40.0, y: 40.0, z: 300.0}
+velocity_gain: {x: 40.0, y: 40.0, z: 120.0}
+integration_gain: {x: 0.1, y: 0.1, z: 0.3}

@@ -35,6 +35,9 @@
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <rotors_gazebo/pos_tuneConfig.h>
+
 double x = 0, y = 0, z = 2, yaw = 0;
 double vx = 0, vy = 0, vz = 0, yawrate = 0;
 
@@ -63,12 +66,28 @@ void referencePoseCallback(const mav_msgs::PosYawConstPtr &msg)
   yaw= msg->yaw;
 };
 
+void position_tune_callback(rotors_gazebo::pos_tuneConfig &config, uint32_t level) {
+
+  x=config.pos_x;
+  y=config.pos_y;
+  z=config.pos_z;
+  yaw=config.pos_yaw;
+
+}
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
   // Create a private node handle for accessing node parameters.
   ros::NodeHandle nh_private("~");
+
+  dynamic_reconfigure::Server<rotors_gazebo::pos_tuneConfig> server;
+  dynamic_reconfigure::Server<rotors_gazebo::pos_tuneConfig>::CallbackType f;
+
+  f = boost::bind(&position_tune_callback, _1, _2);
+  server.setCallback(f);
+
   ros::Publisher pose_pub =
       nh.advertise<geometry_msgs::PoseStamped>(
           mav_msgs::default_topics::COMMAND_POSE, 10);
